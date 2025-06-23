@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iTabs Development Chat Summary</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+        line-height: 1.6;
+        color: #333;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px;
+    }
+    
+    .itabs-container {
+        max-width: 800px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+        overflow: hidden;
+    }
+    
+    .itabs-header {
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        color: white;
+        padding: 30px;
+        text-align: center;
+    }
+    
+    .itabs-title {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+    
+    .itabs-subtitle {
+        font-size: 1.1rem;
+        opacity: 0.9;
+    }
+    
+    .chat-preview {
+        padding: 30px;
+        background: #f8f9fa;
+        border-bottom: 1px solid #e9ecef;
+    }
+    
+    .chat-summary {
+        background: white;
+        border-radius: 12px;
+        padding: 25px;
+        border: 1px solid #e9ecef;
+        position: relative;
+    }
+    
+    .summary-text {
+        color: #495057;
+        line-height: 1.7;
+        margin-bottom: 20px;
+    }
+    
+    .smart-link {
+        color: #2a5298;
+        text-decoration: none;
+        font-weight: 600;
+        position: relative;
+        cursor: pointer;
+        padding: 2px 4px;
+        border-radius: 4px;
+        transition: all 0.3s ease;
+    }
+    
+    .smart-link:hover {
+        background: #e8f4fd;
+    }
+    
+    .i-indicator {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 20px;
+        height: 20px;
+        background: #ff6b6b;
+        color: white;
+        border-radius: 50%;
+        font-size: 11px;
+        font-style: italic;
+        font-weight: bold;
+        margin-left: 5px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+        0% { box-shadow: 0 0 0 0 rgba(255, 107, 107, 0.7); }
+        70% { box-shadow: 0 0 0 8px rgba(255, 107, 107, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(255, 107, 107, 0); }
+    }
+    
+    .i-indicator:hover {
+        transform: scale(1.2);
+        animation: none;
+        background: #ff5252;
+    }
+    
+    .demo-callout {
+        background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+        border-radius: 12px;
+        padding: 20px;
+        margin: 20px 0;
+        text-align: center;
+        border: 2px solid #ff6b6b;
+    }
+    
+    .demo-callout h3 {
+        color: #ad1457;
+        margin-bottom: 10px;
+        font-size: 1.3rem;
+    }
+    
+    .demo-callout p {
+        color: #ad1457;
+        font-weight: 500;
+    }
+    
+    /* iTabs Popup Styles */
+    .itabs-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.6);
+        z-index: 1000;
+        display: none;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .itabs-overlay.active {
+        display: flex;
+    }
+    
+    .itabs-popup {
+        background: white;
+        width: 90vw;
+        max-width: 600px;
+        max-height: 80vh;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        animation: slideIn 0.4s ease;
+    }
+    
+    @keyframes slideIn {
+        from { opacity: 0; transform: scale(0.9) translateY(-20px); }
+        to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    
+    .popup-header {
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        color: white;
+        padding: 20px;
+        position: relative;
+    }
+    
+    .popup-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin: 0;
+    }
+    
+    .popup-close {
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: rgba(255,255,255,0.2);
+        border: none;
+        color: white;
+        font-size: 24px;
+        cursor: pointer;
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.3s ease;
+    }
+    
+    .popup-close:hover {
+        background: rgba(255,255,255,0.3);
+    }
+    
+    .popup-tabs {
+        display: flex;
+        background: #f8f9fa;
+        border-bottom: 1px solid #e9ecef;
+    }
+    
+    .popup-tab {
+        flex: 1;
+        padding: 15px 10px;
+        background: none;
+        border: none;
+        font-weight: 600;
+        color: #6c757d;
+        cursor: pointer;
+        text-align: center;
+        border-bottom: 3px solid transparent;
+        transition: all 0.3s ease;
+        font-size: 14px;
+    }
+    
+    .popup-tab:hover {
+        color: #2a5298;
+        background: rgba(42, 82, 152, 0.05);
+    }
+    
+    .popup-tab.active {
+        color: #2a5298;
+        background: white;
+        border-bottom-color: #2a5298;
+    }
+    
+    .popup-content {
+        padding: 25px;
+        max-height: 400px;
+        overflow-y: auto;
+    }
+    
+    .tab-content {
+        display: none;
+    }
+    
+    .tab-content.active {
+        display: block;
+    }
+    
+    .tab-content h4 {
+        color: #2c3e50;
+        margin-bottom: 15px;
+        font-size: 1.1rem;
+    }
+    
+    .tab-content p {
+        margin-bottom: 15px;
+        line-height: 1.6;
+        color: #495057;
+    }
+    
+    .tab-content ul {
+        margin: 15px 0;
+        padding-left: 20px;
+    }
+    
+    .tab-content li {
+        margin-bottom: 8px;
+        color: #495057;
+    }
+    
+    .highlight-box {
+        background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+        border-left: 4px solid #2a5298;
+        padding: 20px;
+        margin: 20px 0;
+        border-radius: 0 8px 8px 0;
+    }
+    
+    .highlight-box h5 {
+        color: #1565c0;
+        margin-bottom: 10px;
+        font-size: 1rem;
+    }
+    
+    .implementation-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 15px;
+        margin: 20px 0;
+    }
+    
+    .implementation-card {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 8px;
+        border-left: 3px solid #28a745;
+    }
+    
+    .implementation-card h6 {
+        color: #155724;
+        margin-bottom: 8px;
+        font-size: 0.9rem;
+    }
+    
+    .implementation-card p {
+        color: #6c757d;
+        font-size: 0.85rem;
+        margin: 0;
+    }
+    
+    @media (max-width: 768px) {
+        .itabs-popup {
+            width: 95vw;
+            max-height: 85vh;
+        }
+        
+        .popup-content {
+            padding: 20px;
+        }
+        
+        .popup-tabs {
+            flex-wrap: wrap;
+        }
+        
+        .popup-tab {
+            font-size: 12px;
+            padding: 12px 8px;
+        }
+    }
+</style>
+
+</head>
+<body>
+    <div class="itabs-container">
+        <div class="itabs-header">
+            <h1 class="itabs-title">iTabs Development Chat</h1>
+            <p class="itabs-subtitle">Interactive Information Display System - Live Demo</p>
+        </div>
+
+    <div class="chat-preview">
+        <div class="chat-summary">
+            <div class="summary-text">
+                Our conversation explored how <span class="smart-link" onclick="openItabs('concept')">iTabs transforms complex product information<span class="i-indicator">i</span></span> into accessible, organized displays. We identified multiple <span class="smart-link" onclick="openItabs('implementations')">implementation approaches<span class="i-indicator">i</span></span> including on-site enhancements, SmartLinks, and standalone pages.
+            </div>
+            
+            <div class="summary-text">
+                The key breakthrough was recognizing that <span class="smart-link" onclick="openItabs('flexibility')">different businesses need different approaches<span class="i-indicator">i</span></span> rather than forcing a single solution. From Alliance AMS's automotive catalog to content marketing applications, iTabs adapts to various <span class="smart-link" onclick="openItabs('use-cases')">use cases and contexts<span class="i-indicator">i</span></span>.
+            </div>
+            
+            <div class="demo-callout">
+                <h3>👆 Try Clicking the Blue "i" Icons Above!</h3>
+                <p>This demonstrates exactly how iTabs work - organized information without leaving the page</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- iTabs Overlay -->
+<div class="itabs-overlay" id="itabsOverlay" onclick="closeItabs()">
+    <div class="itabs-popup" onclick="event.stopPropagation()">
+        <div class="popup-header">
+            <h3 class="popup-title" id="popupTitle">iTabs Information</h3>
+            <button class="popup-close" onclick="closeItabs()">&times;</button>
+        </div>
+        
+        <div class="popup-tabs">
+            <button class="popup-tab active" onclick="switchTab(this, 'overview')">Overview</button>
+            <button class="popup-tab" onclick="switchTab(this, 'details')">Details</button>
+            <button class="popup-tab" onclick="switchTab(this, 'impact')">Impact</button>
+            <button class="popup-tab" onclick="switchTab(this, 'next-steps')">Next Steps</button>
+        </div>
+        
+        <div class="popup-content">
+            <div class="tab-content active" id="overview">
+                <div id="overviewContent"></div>
+            </div>
+            
+            <div class="tab-content" id="details">
+                <div id="detailsContent"></div>
+            </div>
+            
+            <div class="tab-content" id="impact">
+                <div id="impactContent"></div>
+            </div>
+            
+            <div class="tab-content" id="next-steps">
+                <div id="nextStepsContent"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Part 2: Complete JavaScript Functionality
+    
+    const itabsData = {
+        'concept': {
+            title: 'iTabs Core Concept',
+            overview: {
+                content: `<h4>Interactive Information Display System</h4>
+                <p>iTabs transforms confusing product codes and complex information into organized, accessible displays. Instead of forcing users to hunt through websites or call for basic details, they get instant access to structured information.</p>
+                
+                <div class="highlight-box">
+                    <h5>The Problem We Solve</h5>
+                    <p>47% of users abandon research when information is scattered or hard to understand. iTabs keeps them engaged by providing organized, contextual information exactly when they need it.</p>
+                </div>`
+            },
+            details: {
+                content: `<h4>How iTabs Work</h4>
+                <ul>
+                    <li><strong>Small "i" indicators</strong> appear next to key terms or product codes</li>
+                    <li><strong>Click reveals organized tabs</strong> with Overview, Specifications, Pricing, Applications</li>
+                    <li><strong>Information stays contextual</strong> - users don't leave their current page</li>
+                    <li><strong>Mobile-optimized experience</strong> works perfectly on all devices</li>
+                </ul>
+                
+                <p>The genius is in the simplicity - everyone recognizes the "i" icon as "information" and the tabbed interface feels familiar and intuitive.</p>`
+            },
+            impact: {
+                content: `<h4>Transformative Business Impact</h4>
+                <p><strong>For Businesses:</strong></p>
+                <ul>
+                    <li>Reduce support calls by 60% (customers find answers themselves)</li>
+                    <li>Increase conversion rates by 32% (better-informed customers buy more)</li>
+                    <li>Improve customer satisfaction through self-service information</li>
+                </ul>
+                
+                <p><strong>For Customers:</strong></p>
+                <ul>
+                    <li>Get instant answers without phone calls or email</li>
+                    <li>Make confident purchasing decisions with complete information</li>
+                    <li>Save time with organized, relevant details</li>
+                </ul>`
+            },
+            nextSteps: {
+                content: `<h4>Development Priorities</h4>
+                <ul>
+                    <li><strong>CSV to iTabs converter</strong> - Bulk process existing product catalogs</li>
+                    <li><strong>Implementation tools</strong> - WordPress plugins, embed codes, APIs</li>
+                    <li><strong>Alliance AMS pilot</strong> - Prove concept with real business</li>
+                    <li><strong>SmartLink generator</strong> - Enable product sharing with organized information</li>
+                </ul>
+                
+                <div class="highlight-box">
+                    <h5>Immediate Focus</h5>
+                    <p>Build the content management system that lets businesses like Alliance AMS transform their 50,000+ products from cryptic codes into customer-friendly information displays.</p>
+                </div>`
+            }
+        },
+        
+        'implementations': {
+            title: 'Implementation Approaches',
+            overview: {
+                content: `<h4>Multiple Paths to iTabs Success</h4>
+                <p>Our conversation revealed that iTabs needs flexibility - different businesses have different needs and technical capabilities. Rather than forcing one approach, we identified multiple implementation strategies.</p>
+                
+                <div class="implementation-grid">
+                    <div class="implementation-card">
+                        <h6>On-Site Enhancement</h6>
+                        <p>Add "i" indicators to existing website product listings</p>
+                    </div>
+                    <div class="implementation-card">
+                        <h6>SmartLink Redirects</h6>
+                        <p>Special URLs that open pages with specific iTabs displayed</p>
+                    </div>
+                    <div class="implementation-card">
+                        <h6>Standalone Pages</h6>
+                        <p>Pure iTabs experiences hosted independently</p>
+                    </div>
+                    <div class="implementation-card">
+                        <h6>Hybrid Approaches</h6>
+                        <p>Mix multiple methods based on specific use cases</p>
+                    </div>
+                </div>`
+            },
+            details: {
+                content: `<h4>Technical Implementation Details</h4>
+                
+                <p><strong>Level 1: Website Enhancement</strong></p>
+                <ul>
+                    <li>JavaScript adds "i" indicators to existing product codes</li>
+                    <li>Popup system overlays on current website design</li>
+                    <li>No URL changes or major website modifications needed</li>
+                </ul>
+                
+                <p><strong>Level 2: SmartLinks</strong></p>
+                <ul>
+                    <li>URLs like: allianceams.com/products?itab=brake-pads</li>
+                    <li>Page loads with specific iTabs automatically opened</li>
+                    <li>Perfect for email marketing and sales follow-ups</li>
+                </ul>
+                
+                <p><strong>Level 3: Standalone Experience</strong></p>
+                <ul>
+                    <li>Pure iTabs pages: itabs.co/alliance-ams/brake-pads</li>
+                    <li>Focused product information without website navigation</li>
+                    <li>Ideal for social media sharing and content marketing</li>
+                </ul>`
+            },
+            impact: {
+                content: `<h4>Strategic Business Advantages</h4>
+                
+                <div class="highlight-box">
+                    <h5>Flexibility = Competitive Advantage</h5>
+                    <p>Unlike rigid solutions that force businesses to change their entire approach, iTabs adapts to existing workflows and technical capabilities.</p>
+                </div>
+                
+                <p><strong>Conservative Businesses:</strong> Start with simple on-site enhancement</p>
+                <p><strong>Sales-Focused Teams:</strong> Use SmartLinks for customer communication</p>
+                <p><strong>Content Marketers:</strong> Leverage standalone pages for maximum shareability</p>
+                <p><strong>Advanced Users:</strong> Mix all approaches strategically</p>
+                
+                <p>This means iTabs can serve businesses at any technical level and scale with their growth and sophistication.</p>`
+            },
+            nextSteps: {
+                content: `<h4>Implementation Roadmap</h4>
+                
+                <p><strong>Phase 1: Prove the Concept</strong></p>
+                <ul>
+                    <li>Build on-site enhancement for Alliance AMS</li>
+                    <li>Measure customer engagement improvements</li>
+                    <li>Document ROI and success metrics</li>
+                </ul>
+                
+                <p><strong>Phase 2: Expand Capabilities</strong></p>
+                <ul>
+                    <li>Add SmartLink generation tools</li>
+                    <li>Create standalone page hosting</li>
+                    <li>Develop WordPress plugin integration</li>
+                </ul>
+                
+                <p><strong>Phase 3: Scale the Platform</strong></p>
+                <ul>
+                    <li>Multi-business hosting on itabs.co</li>
+                    <li>Advanced analytics and optimization</li>
+                    <li>API access for custom integrations</li>
+                </ul>`
+            }
+        },
+        
+        'flexibility': {
+            title: 'Strategic Flexibility',
+            overview: {
+                content: `<h4>Adapting to Business Needs</h4>
+                <p>The breakthrough insight from our conversation: <strong>different businesses need different approaches</strong> rather than forcing everyone into the same solution.</p>
+                
+                <div class="highlight-box">
+                    <h5>Key Realization</h5>
+                    <p>"It would all have different applications, some with some without" - This simple statement unlocked iTabs' true potential as a flexible platform rather than a rigid tool.</p>
+                </div>
+                
+                <p>This flexibility becomes iTabs' competitive advantage - meeting businesses where they are instead of forcing them to change their entire digital strategy.</p>`
+            },
+            details: {
+                content: `<h4>Business-Specific Applications</h4>
+                
+                <p><strong>Alliance AMS (Automotive Parts):</strong></p>
+                <ul>
+                    <li>On-site enhancement for existing website</li>
+                    <li>SmartLinks for sales team email communication</li>
+                    <li>Standalone pages for social media product promotion</li>
+                </ul>
+                
+                <p><strong>Content Creators/Bloggers:</strong></p>
+                <ul>
+                    <li>Standalone iTabs pages for affiliate marketing</li>
+                    <li>SmartLinks in YouTube video descriptions</li>
+                    <li>Enhanced article links for better reader experience</li>
+                </ul>
+                
+                <p><strong>B2B Sales Teams:</strong></p>
+                <ul>
+                    <li>SmartLinks for proposal follow-ups</li>
+                    <li>Standalone pages for product presentations</li>
+                    <li>Email-optimized product information sharing</li>
+                </ul>`
+            },
+            impact: {
+                content: `<h4>Market Positioning Advantage</h4>
+                
+                <p><strong>Traditional Approach:</strong> "Here's our solution, adapt your business to use it"</p>
+                <p><strong>iTabs Approach:</strong> "Here are multiple ways to enhance your information sharing - choose what works for you"</p>
+                
+                <div class="highlight-box">
+                    <h5>Competitive Differentiation</h5>
+                    <p>While competitors offer rigid solutions, iTabs provides a flexible platform that grows with businesses and adapts to their evolving needs.</p>
+                </div>
+                
+                <p>This positions iTabs as essential infrastructure rather than just another tool - it becomes part of how businesses communicate about their products and services.</p>`
+            },
+            nextSteps: {
+                content: `<h4>Platform Development Strategy</h4>
+                
+                <p><strong>Build for Flexibility from Day One:</strong></p>
+                <ul>
+                    <li>Modular architecture supporting multiple output formats</li>
+                    <li>Content management system that generates all approaches</li>
+                    <li>Analytics dashboard tracking success across implementations</li>
+                </ul>
+                
+                <p><strong>Business Development Focus:</strong></p>
+                <ul>
+                    <li>Start with businesses that need one approach well</li>
+                    <li>Demonstrate success and expand to additional methods</li>
+                    <li>Use flexibility as the key selling proposition</li>
+                </ul>`
+            }
+        },
+        
+        'use-cases': {
+            title: 'Use Cases & Applications',
+            overview: {
+                content: `<h4>Diverse Application Scenarios</h4>
+                <p>Our conversation evolved from simple product enhancement to recognizing iTabs' potential across multiple contexts - from automotive catalogs to content marketing to sales communication.</p>
+                
+                <div class="highlight-box">
+                    <h5>Universal Information Challenge</h5>
+                    <p>Every business with complex products or services faces the same problem: how to share detailed information without overwhelming or losing their audience.</p>
+                </div>`
+            },
+            details: {
+                content: `<h4>Proven Application Categories</h4>
+                
+                <p><strong>E-commerce & Product Catalogs:</strong></p>
+                <ul>
+                    <li>Transform cryptic part numbers into customer-friendly information</li>
+                    <li>Reduce support calls with self-service product details</li>
+                    <li>Improve conversion rates through better product understanding</li>
+                </ul>
+                
+                <p><strong>Content Marketing & Education:</strong></p>
+                <ul>
+                    <li>Enhanced blog articles with contextual product information</li>
+                    <li>YouTube video descriptions with organized product links</li>
+                    <li>Educational content that becomes actionable</li>
+                </ul>
+                
+                <p><strong>Sales & Customer Communication:</strong></p>
+                <ul>
+                    <li>Email follow-ups with specific product information</li>
+                    <li>Proposal attachments that provide comprehensive details</li>
+                    <li>Social media sharing with organized product specifications</li>
+                </ul>`
+            },
+            impact: {
+                content: `<h4>Cross-Industry Transformation</h4>
+                
+                <p><strong>Immediate Impact Areas:</strong></p>
+                <ul>
+                    <li><strong>Automotive Parts:</strong> Alliance AMS's 50,000+ products become searchable and understandable</li>
+                    <li><strong>Industrial Equipment:</strong> Complex machinery specifications organized for decision-makers</li>
+                    <li><strong>Technical Services:</strong> Service descriptions with clear pricing and process information</li>
+                </ul>
+                
+                <div class="highlight-box">
+                    <h5>Network Effects</h5>
+                    <p>As more businesses adopt iTabs, customers begin expecting organized, accessible product information everywhere - creating market pressure for universal adoption.</p>
+                </div>`
+            },
+            nextSteps: {
+                content: `<h4>Application Development Priority</h4>
+                
+                <p><strong>Start with Alliance AMS Success:</strong></p>
+                <ul>
+                    <li>Prove automotive parts catalog transformation</li>
+                    <li>Measure customer engagement and conversion improvements</li>
+                    <li>Document case study for similar businesses</li>
+                </ul>
+                
+                <p><strong>Expand to Content Marketing:</strong></p>
+                <ul>
+                    <li>Partner with automotive bloggers and YouTubers</li>
+                    <li>Demonstrate affiliate marketing improvements</li>
+                    <li>Create templates for different content types</li>
+                </ul>
+                
+                <p><strong>Scale Across Industries:</strong></p>
+                <ul>
+                    <li>Identify similar catalog-heavy businesses</li>
+                    <li>Develop industry-specific templates</li>
+                    <li>Build platform for multi-business hosting</li>
+                </ul>`
+            }
+        }
+    };
+    
+    function openItabs(topic) {
+        const data = itabsData[topic];
+        if (!data) return;
+        
+        // Update popup title
+        document.getElementById('popupTitle').textContent = data.title;
+        
+        // Populate tab contents
+        document.getElementById('overviewContent').innerHTML = data.overview.content;
+        document.getElementById('detailsContent').innerHTML = data.details.content;
+        document.getElementById('impactContent').innerHTML = data.impact.content;
+        document.getElementById('nextStepsContent').innerHTML = data.nextSteps.content;
+        
+        // Reset to first tab
+        document.querySelectorAll('.popup-tab').forEach(tab => tab.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+        document.querySelector('.popup-tab').classList.add('active');
+        document.getElementById('overview').classList.add('active');
+        
+        // Show overlay
+        document.getElementById('itabsOverlay').classList.add('active');
+    }
+    
+    function closeItabs() {
+        document.getElementById('itabsOverlay').classList.remove('active');
+    }
+    
+    function switchTab(tabElement, tabName) {
+        // Remove active from all tabs and contents
+        document.querySelectorAll('.popup-tab').forEach(tab => tab.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+        
+        // Add active to clicked tab and corresponding content
+        tabElement.classList.add('active');
+        document.getElementById(tabName).classList.add('active');
+    }
+    
+    // Close on Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeItabs();
+        }
+    });
+    
+    console.log('iTabs demo fully loaded with interactive functionality');
+</script>
+
+</body>
+</html>
