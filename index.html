@@ -1,10 +1,9 @@
-<!DOCTYPE html>
 
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>iTabs Development Chat Summary</title>
+    <title>iTabs: Making Complex Research Actually Readable</title>
     <style>
         * {
             margin: 0;
@@ -12,726 +11,851 @@
             box-sizing: border-box;
         }
 
-    body {
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
-        line-height: 1.6;
-        color: #333;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        min-height: 100vh;
-        padding: 20px;
-    }
-    
-    .itabs-container {
-        max-width: 800px;
-        margin: 0 auto;
-        background: white;
-        border-radius: 16px;
-        box-shadow: 0 20px 60px rgba(0,0,0,0.2);
-        overflow: hidden;
-    }
-    
-    .itabs-header {
-        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-        color: white;
-        padding: 30px;
-        text-align: center;
-    }
-    
-    .itabs-title {
-        font-size: 2rem;
-        font-weight: 700;
-        margin-bottom: 10px;
-    }
-    
-    .itabs-subtitle {
-        font-size: 1.1rem;
-        opacity: 0.9;
-    }
-    
-    .chat-preview {
-        padding: 30px;
-        background: #f8f9fa;
-        border-bottom: 1px solid #e9ecef;
-    }
-    
-    .chat-summary {
-        background: white;
-        border-radius: 12px;
-        padding: 25px;
-        border: 1px solid #e9ecef;
-        position: relative;
-    }
-    
-    .summary-text {
-        color: #495057;
-        line-height: 1.7;
-        margin-bottom: 20px;
-    }
-    
-    .smart-link {
-        color: #2a5298;
-        text-decoration: none;
-        font-weight: 600;
-        position: relative;
-        cursor: pointer;
-        padding: 2px 4px;
-        border-radius: 4px;
-        transition: all 0.3s ease;
-    }
-    
-    .smart-link:hover {
-        background: #e8f4fd;
-    }
-    
-    .i-indicator {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 20px;
-        height: 20px;
-        background: #ff6b6b;
-        color: white;
-        border-radius: 50%;
-        font-size: 11px;
-        font-style: italic;
-        font-weight: bold;
-        margin-left: 5px;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        animation: pulse 2s infinite;
-    }
-    
-    @keyframes pulse {
-        0% { box-shadow: 0 0 0 0 rgba(255, 107, 107, 0.7); }
-        70% { box-shadow: 0 0 0 8px rgba(255, 107, 107, 0); }
-        100% { box-shadow: 0 0 0 0 rgba(255, 107, 107, 0); }
-    }
-    
-    .i-indicator:hover {
-        transform: scale(1.2);
-        animation: none;
-        background: #ff5252;
-    }
-    
-    .demo-callout {
-        background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
-        border-radius: 12px;
-        padding: 20px;
-        margin: 20px 0;
-        text-align: center;
-        border: 2px solid #ff6b6b;
-    }
-    
-    .demo-callout h3 {
-        color: #ad1457;
-        margin-bottom: 10px;
-        font-size: 1.3rem;
-    }
-    
-    .demo-callout p {
-        color: #ad1457;
-        font-weight: 500;
-    }
-    
-    /* iTabs Popup Styles */
-    .itabs-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0,0,0,0.6);
-        z-index: 1000;
-        display: none;
-        align-items: center;
-        justify-content: center;
-    }
-    
-    .itabs-overlay.active {
-        display: flex;
-    }
-    
-    .itabs-popup {
-        background: white;
-        width: 90vw;
-        max-width: 600px;
-        max-height: 80vh;
-        border-radius: 16px;
-        overflow: hidden;
-        box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-        animation: slideIn 0.4s ease;
-    }
-    
-    @keyframes slideIn {
-        from { opacity: 0; transform: scale(0.9) translateY(-20px); }
-        to { opacity: 1; transform: scale(1) translateY(0); }
-    }
-    
-    .popup-header {
-        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-        color: white;
-        padding: 20px;
-        position: relative;
-    }
-    
-    .popup-title {
-        font-size: 1.3rem;
-        font-weight: 600;
-        margin: 0;
-    }
-    
-    .popup-close {
-        position: absolute;
-        right: 15px;
-        top: 50%;
-        transform: translateY(-50%);
-        background: rgba(255,255,255,0.2);
-        border: none;
-        color: white;
-        font-size: 24px;
-        cursor: pointer;
-        width: 35px;
-        height: 35px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: background 0.3s ease;
-    }
-    
-    .popup-close:hover {
-        background: rgba(255,255,255,0.3);
-    }
-    
-    .popup-tabs {
-        display: flex;
-        background: #f8f9fa;
-        border-bottom: 1px solid #e9ecef;
-    }
-    
-    .popup-tab {
-        flex: 1;
-        padding: 15px 10px;
-        background: none;
-        border: none;
-        font-weight: 600;
-        color: #6c757d;
-        cursor: pointer;
-        text-align: center;
-        border-bottom: 3px solid transparent;
-        transition: all 0.3s ease;
-        font-size: 14px;
-    }
-    
-    .popup-tab:hover {
-        color: #2a5298;
-        background: rgba(42, 82, 152, 0.05);
-    }
-    
-    .popup-tab.active {
-        color: #2a5298;
-        background: white;
-        border-bottom-color: #2a5298;
-    }
-    
-    .popup-content {
-        padding: 25px;
-        max-height: 400px;
-        overflow-y: auto;
-    }
-    
-    .tab-content {
-        display: none;
-    }
-    
-    .tab-content.active {
-        display: block;
-    }
-    
-    .tab-content h4 {
-        color: #2c3e50;
-        margin-bottom: 15px;
-        font-size: 1.1rem;
-    }
-    
-    .tab-content p {
-        margin-bottom: 15px;
-        line-height: 1.6;
-        color: #495057;
-    }
-    
-    .tab-content ul {
-        margin: 15px 0;
-        padding-left: 20px;
-    }
-    
-    .tab-content li {
-        margin-bottom: 8px;
-        color: #495057;
-    }
-    
-    .highlight-box {
-        background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
-        border-left: 4px solid #2a5298;
-        padding: 20px;
-        margin: 20px 0;
-        border-radius: 0 8px 8px 0;
-    }
-    
-    .highlight-box h5 {
-        color: #1565c0;
-        margin-bottom: 10px;
-        font-size: 1rem;
-    }
-    
-    .implementation-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 15px;
-        margin: 20px 0;
-    }
-    
-    .implementation-card {
-        background: #f8f9fa;
-        padding: 15px;
-        border-radius: 8px;
-        border-left: 3px solid #28a745;
-    }
-    
-    .implementation-card h6 {
-        color: #155724;
-        margin-bottom: 8px;
-        font-size: 0.9rem;
-    }
-    
-    .implementation-card p {
-        color: #6c757d;
-        font-size: 0.85rem;
-        margin: 0;
-    }
-    
-    @media (max-width: 768px) {
-        .itabs-popup {
-            width: 95vw;
-            max-height: 85vh;
-        }
-        
-        .popup-content {
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             padding: 20px;
+            line-height: 1.6;
+            min-height: 100vh;
         }
         
-        .popup-tabs {
-            flex-wrap: wrap;
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
         }
         
-        .popup-tab {
-            font-size: 12px;
-            padding: 12px 8px;
+        .hero {
+            text-align: center;
+            margin-bottom: 50px;
+            padding-bottom: 30px;
+            border-bottom: 3px solid #e2e8f0;
         }
-    }
-</style>
-
+        
+        h1 {
+            color: #2d3748;
+            font-size: 2.8em;
+            margin-bottom: 15px;
+            line-height: 1.2;
+        }
+        
+        .hero-subtitle {
+            color: #718096;
+            font-size: 1.3em;
+            margin-bottom: 25px;
+        }
+        
+        .problem-box {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 40px;
+            font-size: 1.2em;
+            text-align: center;
+            font-weight: 500;
+        }
+        
+        .solution-box {
+            background: linear-gradient(135deg, #51cf66 0%, #37b24d 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 40px;
+            font-size: 1.2em;
+            text-align: center;
+            font-weight: 500;
+        }
+        
+        .content-section {
+            margin-bottom: 40px;
+            padding: 30px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            border-left: 5px solid #667eea;
+            transition: all 0.3s ease;
+        }
+        
+        .content-section:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.2);
+        }
+        
+        h2 {
+            color: #2d3748;
+            font-size: 1.9em;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        h3 {
+            color: #4a5568;
+            font-size: 1.4em;
+            margin: 25px 0 15px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        p {
+            color: #4a5568;
+            font-size: 1.1em;
+            margin-bottom: 15px;
+            line-height: 1.8;
+        }
+        
+        .itab-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 50%;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            border: 3px solid white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+        
+        .itab-button:hover {
+            transform: scale(1.15);
+            box-shadow: 0 6px 25px rgba(102, 126, 234, 0.6);
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+        }
+        
+        .itab-button:active {
+            transform: scale(1.05);
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .modal-content {
+            position: relative;
+            background-color: white;
+            margin: 5% auto;
+            padding: 0;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 700px;
+            max-height: 85vh;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideIn 0.3s ease;
+            overflow: hidden;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-header h3 {
+            margin: 0;
+            font-size: 1.6em;
+            color: white;
+        }
+        
+        .close {
+            color: white;
+            font-size: 35px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            line-height: 1;
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+        
+        .close:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: rotate(90deg);
+        }
+        
+        .modal-tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 15px 20px;
+            text-align: center;
+            cursor: pointer;
+            background: #f8f9fa;
+            border: none;
+            font-size: 1em;
+            font-weight: 600;
+            color: #718096;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+        }
+        
+        .tab:hover {
+            background: #edf2f7;
+            color: #667eea;
+        }
+        
+        .tab.active {
+            background: white;
+            color: #667eea;
+            border-bottom: 3px solid #667eea;
+        }
+        
+        .modal-body {
+            padding: 30px;
+            max-height: calc(85vh - 200px);
+            overflow-y: auto;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .tab-content h4 {
+            color: #2d3748;
+            font-size: 1.3em;
+            margin-bottom: 15px;
+        }
+        
+        .tab-content p {
+            color: #4a5568;
+            font-size: 1.05em;
+            line-height: 1.8;
+            margin-bottom: 15px;
+        }
+        
+        .tab-content ul, .tab-content ol {
+            margin: 15px 0;
+            padding-left: 25px;
+        }
+        
+        .tab-content li {
+            color: #4a5568;
+            font-size: 1.05em;
+            margin-bottom: 10px;
+            line-height: 1.7;
+        }
+        
+        .stat-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .stat-label {
+            font-size: 1.1em;
+        }
+        
+        .highlight {
+            background: #fef3c7;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-weight: 600;
+        }
+        
+        .cta-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 15px;
+            text-align: center;
+            margin-top: 50px;
+        }
+        
+        .cta-section h2 {
+            color: white;
+            font-size: 2.2em;
+            margin-bottom: 20px;
+            justify-content: center;
+        }
+        
+        .cta-section p {
+            color: white;
+            font-size: 1.3em;
+            margin-bottom: 25px;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+            
+            .hero-subtitle {
+                font-size: 1.1em;
+            }
+            
+            h2 {
+                font-size: 1.5em;
+            }
+            
+            .modal-content {
+                width: 95%;
+                margin: 10% auto;
+            }
+            
+            .modal-tabs {
+                flex-direction: column;
+            }
+            
+            .tab {
+                border-bottom: 1px solid #e2e8f0;
+            }
+        }
+    </style>
 </head>
 <body>
-    <div class="itabs-container">
-        <div class="itabs-header">
-            <h1 class="itabs-title">iTabs Development Chat</h1>
-            <p class="itabs-subtitle">Interactive Information Display System - Live Demo</p>
+    <div class="container">
+        <div class="hero">
+            <h1>Why Nobody Reads Your Research</h1>
+            <p class="hero-subtitle">...and how iTabs fixes that in seconds</p>
         </div>
 
-    <div class="chat-preview">
-        <div class="chat-summary">
-            <div class="summary-text">
-                Our conversation explored how <span class="smart-link" onclick="openItabs('concept')">iTabs transforms complex product information<span class="i-indicator">i</span></span> into accessible, organized displays. We identified multiple <span class="smart-link" onclick="openItabs('implementations')">implementation approaches<span class="i-indicator">i</span></span> including on-site enhancements, SmartLinks, and standalone pages.
+        <div class="problem-box">
+            📄 You spent hours researching the Canva marketplace. Did anyone read all 5,000 words? Probably not.
+        </div>
+        
+        <div class="solution-box">
+            ✨ What if they could click blue "i" buttons to explore only what interests them? That's iTabs.
+        </div>
+        
+        <div class="content-section">
+            <h2>
+                <span class="itab-button" onclick="openModal('market-size')">i</span>
+                The Market Opportunity
+            </h2>
+            <p>
+                The interactive content platform market is exploding - but most people won't read the full analysis.
+                Click the blue "i" to see the numbers that matter.
+            </p>
+        </div>
+        
+        <div class="content-section">
+            <h2>
+                <span class="itab-button" onclick="openModal('canva-gap')">i</span>
+                What's Missing from Canva
+            </h2>
+            <p>
+                Canva has 540 apps in their marketplace. Guess how many do popups and interactive layers?
+                Click to find out why this is massive.
+            </p>
+        </div>
+        
+        <div class="content-section">
+            <h2>
+                <span class="itab-button" onclick="openModal('workarounds')">i</span>
+                How Users Currently Struggle
+            </h2>
+            <p>
+                Right now, Canva users are jumping through crazy hoops to add interactivity.
+                See the painful 7-step workarounds they're using.
+            </p>
+        </div>
+        
+        <div class="content-section">
+            <h2>
+                <span class="itab-button" onclick="openModal('competitors')">i</span>
+                The Competition Analysis
+            </h2>
+            <p>
+                ThingLink, Genially, Visme - they're all trying to solve pieces of this puzzle.
+                But nobody's nailed the full solution yet.
+            </p>
+        </div>
+        
+        <div class="content-section">
+            <h2>
+                <span class="itab-button" onclick="openModal('pricing')">i</span>
+                The Pricing Sweet Spot
+            </h2>
+            <p>
+                There's a massive gap between Canva's simplicity and Webflow's $79/month complexity.
+                See where the opportunity sits.
+            </p>
+        </div>
+        
+        <div class="content-section">
+            <h2>
+                <span class="itab-button" onclick="openModal('proof')">i</span>
+                Why iTabs Works
+            </h2>
+            <p>
+                This entire page proves the concept: you're clicking through research that would normally be a boring PDF.
+                See the psychology behind why this works.
+            </p>
+        </div>
+        
+        <div class="cta-section">
+            <h2>See What Just Happened?</h2>
+            <p>You explored 5,000 words of research by clicking only what interested you.</p>
+            <p>Now imagine doing this for crowdfunding campaigns, product catalogs, training materials...</p>
+            <p><strong>That's the iTabs revolution.</strong></p>
+        </div>
+    </div>
+
+    <!-- Market Size Modal -->
+    <div id="market-size" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>The $555 Billion Opportunity</h3>
+                <span class="close" onclick="closeModal('market-size')">&times;</span>
             </div>
-            
-            <div class="summary-text">
-                The key breakthrough was recognizing that <span class="smart-link" onclick="openItabs('flexibility')">different businesses need different approaches<span class="i-indicator">i</span></span> rather than forcing a single solution. From Alliance AMS's automotive catalog to content marketing applications, iTabs adapts to various <span class="smart-link" onclick="openItabs('use-cases')">use cases and contexts<span class="i-indicator">i</span></span>.
+            <div class="modal-tabs">
+                <button class="tab active" onclick="showTab('market-size', 1)">📊 The Numbers</button>
+                <button class="tab" onclick="showTab('market-size', 2)">📈 Growth Drivers</button>
+                <button class="tab" onclick="showTab('market-size', 3)">🎯 The Gap</button>
             </div>
-            
-            <div class="demo-callout">
-                <h3>👆 Try Clicking the "i" Icons Above!</h3>
-                <p>This demonstrates exactly how iTabs work - organized information without leaving the page</p>
+            <div class="modal-body">
+                <div class="tab-content active" id="market-size-tab-1">
+                    <div class="stat-box">
+                        <div class="stat-number">$555.4B</div>
+                        <div class="stat-label">Interactive Content Market by 2032</div>
+                    </div>
+                    <p>The market is growing at <span class="highlight">22.95% annually</span> from $106.31 billion in 2024.</p>
+                    <p>Why? Because <strong>81% of marketers agree interactive content grabs attention more effectively than static content.</strong></p>
+                    <p>Millennials and Gen Z are actively avoiding traditional static PDFs and whitepapers. They want dynamic, interactive experiences.</p>
+                </div>
+                
+                <div class="tab-content" id="market-size-tab-2">
+                    <h4>Five Major Trends Driving Growth:</h4>
+                    <ul>
+                        <li><strong>AI-Driven Personalization:</strong> Real-time content adaptation based on user behavior</li>
+                        <li><strong>Interactive Video Dominance:</strong> Easier implementation tools making it accessible</li>
+                        <li><strong>Mobile-First Design:</strong> Vertical formats becoming the standard</li>
+                        <li><strong>No-Code/Low-Code:</strong> Democratizing creation for non-developers</li>
+                        <li><strong>Static to Dynamic Shift:</strong> Wholesale transition across all digital channels</li>
+                    </ul>
+                    <p>The users who need interactive content the most are the ones who can't code. That's the opportunity.</p>
+                </div>
+                
+                <div class="tab-content" id="market-size-tab-3">
+                    <h4>The Market Gap Nobody's Filling:</h4>
+                    <p><strong>What exists:</strong> Scattered tools requiring multi-step workflows, steep learning curves, or expensive enterprise pricing.</p>
+                    <p><strong>What users need:</strong> One-click conversion from static to interactive, affordable pricing ($15-30/month), and mobile-first design.</p>
+                    <p>The platforms closest to solving this - Genially, ThingLink, Visme - capture significant market share but none fully solve seamless static-to-interactive transformation.</p>
+                    <div class="stat-box">
+                        <div class="stat-label">Canva has 540 marketplace apps.<br>Popup/interactive apps? <strong>Essentially ZERO.</strong></div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<!-- iTabs Overlay -->
-<div class="itabs-overlay" id="itabsOverlay" onclick="closeItabs()">
-    <div class="itabs-popup" onclick="event.stopPropagation()">
-        <div class="popup-header">
-            <h3 class="popup-title" id="popupTitle">iTabs Information</h3>
-            <button class="popup-close" onclick="closeItabs()">&times;</button>
-        </div>
-        
-        <div class="popup-tabs">
-            <button class="popup-tab active" onclick="switchTab(this, 'overview')">Overview</button>
-            <button class="popup-tab" onclick="switchTab(this, 'details')">Details</button>
-            <button class="popup-tab" onclick="switchTab(this, 'impact')">Impact</button>
-            <button class="popup-tab" onclick="switchTab(this, 'next-steps')">Next Steps</button>
-        </div>
-        
-        <div class="popup-content">
-            <div class="tab-content active" id="overview">
-                <div id="overviewContent"></div>
+    <!-- Canva Gap Modal -->
+    <div id="canva-gap" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>The Canva Marketplace Gap</h3>
+                <span class="close" onclick="closeModal('canva-gap')">&times;</span>
             </div>
-            
-            <div class="tab-content" id="details">
-                <div id="detailsContent"></div>
+            <div class="modal-tabs">
+                <button class="tab active" onclick="showTab('canva-gap', 1)">🔍 What Exists</button>
+                <button class="tab" onclick="showTab('canva-gap', 2)">❌ What's Missing</button>
+                <button class="tab" onclick="showTab('canva-gap', 3)">💡 The Opportunity</button>
             </div>
-            
-            <div class="tab-content" id="impact">
-                <div id="impactContent"></div>
-            </div>
-            
-            <div class="tab-content" id="next-steps">
-                <div id="nextStepsContent"></div>
+            <div class="modal-body">
+                <div class="tab-content active" id="canva-gap-tab-1">
+                    <h4>Canva's 540 Apps - Only 4 Do Anything Interactive:</h4>
+                    <ul>
+                        <li><strong>Flourish:</strong> Interactive data visualizations (acquired by Canva in 2022) - 9.5M+ visualizations, 20B views. But it's ONLY for data storytelling.</li>
+                        <li><strong>Vivicon:</strong> Live polls and audience participation during presentations. Real-time engagement, not persistent interactive elements.</li>
+                        <li><strong>PanoViewer:</strong> 360-degree panoramas for real estate tours. Super niche.</li>
+                        <li><strong>AI Quiz Maker:</strong> Educational quizzes. Limited scope.</li>
+                    </ul>
+                    <p>That's it. Four apps out of 540. None do general-purpose popups, tooltips, or information layers.</p>
+                </div>
+                
+                <div class="tab-content" id="canva-gap-tab-2">
+                    <h4>What Definitively Does NOT Exist:</h4>
+                    <ul>
+                        <li>❌ Information "i" buttons with expandable tooltips</li>
+                        <li>❌ Popup overlay layers for exported designs</li>
+                        <li>❌ Clickable hotspots revealing hidden information</li>
+                        <li>❌ Accordion/expandable content widgets</li>
+                        <li>❌ Modal popups triggered by user interactions</li>
+                    </ul>
+                    <p><strong>This is the gap.</strong> Despite massive user demand (see the "How Users Struggle" section), zero native solutions exist.</p>
+                </div>
+                
+                <div class="tab-content" id="canva-gap-tab-3">
+                    <h4>Why This Matters:</h4>
+                    <p>Canva has <span class="highlight">over 185 million monthly active users</span> globally. They're designers, marketers, educators, small business owners - not developers.</p>
+                    <p>These users constantly hit the same wall: <strong>"I love Canva for graphics, but how do I make it interactive?"</strong></p>
+                    <p>Current solution? Export to external tools (ThingLink, Genially, Webflow), rebuild everything, then pray it works on mobile.</p>
+                    <p><strong>The Opportunity:</strong> Be the first to fill this gap with a native or near-native solution that Canva users actually want.</p>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<script>
-    // Part 2: Complete JavaScript Functionality
-    
-    const itabsData = {
-        'concept': {
-            title: 'iTabs Core Concept',
-            overview: {
-                content: `<h4>Interactive Information Display System</h4>
-                <p>iTabs transforms confusing product codes and complex information into organized, accessible displays. Instead of forcing users to hunt through websites or call for basic details, they get instant access to structured information.</p>
-                
-                <div class="highlight-box">
-                    <h5>The Problem We Solve</h5>
-                    <p>47% of users abandon research when information is scattered or hard to understand. iTabs keeps them engaged by providing organized, contextual information exactly when they need it.</p>
-                </div>`
-            },
-            details: {
-                content: `<h4>How iTabs Work</h4>
-                <ul>
-                    <li><strong>Small "i" indicators</strong> appear next to key terms or product codes</li>
-                    <li><strong>Click reveals organized tabs</strong> with Overview, Specifications, Pricing, Applications</li>
-                    <li><strong>Information stays contextual</strong> - users don't leave their current page</li>
-                    <li><strong>Mobile-optimized experience</strong> works perfectly on all devices</li>
-                </ul>
-                
-                <p>The genius is in the simplicity - everyone recognizes the "i" icon as "information" and the tabbed interface feels familiar and intuitive.</p>`
-            },
-            impact: {
-                content: `<h4>Transformative Business Impact</h4>
-                <p><strong>For Businesses:</strong></p>
-                <ul>
-                    <li>Reduce support calls by 60% (customers find answers themselves)</li>
-                    <li>Increase conversion rates by 32% (better-informed customers buy more)</li>
-                    <li>Improve customer satisfaction through self-service information</li>
-                </ul>
-                
-                <p><strong>For Customers:</strong></p>
-                <ul>
-                    <li>Get instant answers without phone calls or email</li>
-                    <li>Make confident purchasing decisions with complete information</li>
-                    <li>Save time with organized, relevant details</li>
-                </ul>`
-            },
-            nextSteps: {
-                content: `<h4>Development Priorities</h4>
-                <ul>
-                    <li><strong>CSV to iTabs converter</strong> - Bulk process existing product catalogs</li>
-                    <li><strong>Implementation tools</strong> - WordPress plugins, embed codes, APIs</li>
-                    <li><strong>Alliance AMS pilot</strong> - Prove concept with real business</li>
-                    <li><strong>SmartLink generator</strong> - Enable product sharing with organized information</li>
-                </ul>
-                
-                <div class="highlight-box">
-                    <h5>Immediate Focus</h5>
-                    <p>Build the content management system that lets businesses like Alliance AMS transform their 50,000+ products from cryptic codes into customer-friendly information displays.</p>
-                </div>`
-            }
-        },
-        
-        'implementations': {
-            title: 'Implementation Approaches',
-            overview: {
-                content: `<h4>Multiple Paths to iTabs Success</h4>
-                <p>Our conversation revealed that iTabs needs flexibility - different businesses have different needs and technical capabilities. Rather than forcing one approach, we identified multiple implementation strategies.</p>
-                
-                <div class="implementation-grid">
-                    <div class="implementation-card">
-                        <h6>On-Site Enhancement</h6>
-                        <p>Add "i" indicators to existing website product listings</p>
-                    </div>
-                    <div class="implementation-card">
-                        <h6>SmartLink Redirects</h6>
-                        <p>Special URLs that open pages with specific iTabs displayed</p>
-                    </div>
-                    <div class="implementation-card">
-                        <h6>Standalone Pages</h6>
-                        <p>Pure iTabs experiences hosted independently</p>
-                    </div>
-                    <div class="implementation-card">
-                        <h6>Hybrid Approaches</h6>
-                        <p>Mix multiple methods based on specific use cases</p>
-                    </div>
-                </div>`
-            },
-            details: {
-                content: `<h4>Technical Implementation Details</h4>
-                
-                <p><strong>Level 1: Website Enhancement</strong></p>
-                <ul>
-                    <li>JavaScript adds "i" indicators to existing product codes</li>
-                    <li>Popup system overlays on current website design</li>
-                    <li>No URL changes or major website modifications needed</li>
-                </ul>
-                
-                <p><strong>Level 2: SmartLinks</strong></p>
-                <ul>
-                    <li>URLs like: allianceams.com/products?itab=brake-pads</li>
-                    <li>Page loads with specific iTabs automatically opened</li>
-                    <li>Perfect for email marketing and sales follow-ups</li>
-                </ul>
-                
-                <p><strong>Level 3: Standalone Experience</strong></p>
-                <ul>
-                    <li>Pure iTabs pages: itabs.co/alliance-ams/brake-pads</li>
-                    <li>Focused product information without website navigation</li>
-                    <li>Ideal for social media sharing and content marketing</li>
-                </ul>`
-            },
-            impact: {
-                content: `<h4>Strategic Business Advantages</h4>
-                
-                <div class="highlight-box">
-                    <h5>Flexibility = Competitive Advantage</h5>
-                    <p>Unlike rigid solutions that force businesses to change their entire approach, iTabs adapts to existing workflows and technical capabilities.</p>
+    <!-- Workarounds Modal -->
+    <div id="workarounds" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>How Users Currently Struggle</h3>
+                <span class="close" onclick="closeModal('workarounds')">&times;</span>
+            </div>
+            <div class="modal-tabs">
+                <button class="tab active" onclick="showTab('workarounds', 1)">😫 The Pain</button>
+                <button class="tab" onclick="showTab('workarounds', 2)">🔧 Current Hacks</button>
+                <button class="tab" onclick="showTab('workarounds', 3)">💬 User Quotes</button>
+            </div>
+            <div class="modal-body">
+                <div class="tab-content active" id="workarounds-tab-1">
+                    <h4>The Universal Problem:</h4>
+                    <p><strong>"I need to add more information but don't have space."</strong></p>
+                    <p>Canva's technical limitations make this worse:</p>
+                    <ul>
+                        <li>Maximum dimensions: 8000px × 3125px</li>
+                        <li>200-page limit per design</li>
+                        <li>5GB file upload limit</li>
+                        <li>Zero native interactivity for exported content</li>
+                    </ul>
+                    <p>Result? Users create workarounds that take hours and produce mediocre results.</p>
                 </div>
                 
-                <p><strong>Conservative Businesses:</strong> Start with simple on-site enhancement</p>
-                <p><strong>Sales-Focused Teams:</strong> Use SmartLinks for customer communication</p>
-                <p><strong>Content Marketers:</strong> Leverage standalone pages for maximum shareability</p>
-                <p><strong>Advanced Users:</strong> Mix all approaches strategically</p>
-                
-                <p>This means iTabs can serve businesses at any technical level and scale with their growth and sophistication.</p>`
-            },
-            nextSteps: {
-                content: `<h4>Implementation Roadmap</h4>
-                
-                <p><strong>Phase 1: Prove the Concept</strong></p>
-                <ul>
-                    <li>Build on-site enhancement for Alliance AMS</li>
-                    <li>Measure customer engagement improvements</li>
-                    <li>Document ROI and success metrics</li>
-                </ul>
-                
-                <p><strong>Phase 2: Expand Capabilities</strong></p>
-                <ul>
-                    <li>Add SmartLink generation tools</li>
-                    <li>Create standalone page hosting</li>
-                    <li>Develop WordPress plugin integration</li>
-                </ul>
-                
-                <p><strong>Phase 3: Scale the Platform</strong></p>
-                <ul>
-                    <li>Multi-business hosting on itabs.co</li>
-                    <li>Advanced analytics and optimization</li>
-                    <li>API access for custom integrations</li>
-                </ul>`
-            }
-        },
-        
-        'flexibility': {
-            title: 'Strategic Flexibility',
-            overview: {
-                content: `<h4>Adapting to Business Needs</h4>
-                <p>The breakthrough insight from our conversation: <strong>different businesses need different approaches</strong> rather than forcing everyone into the same solution.</p>
-                
-                <div class="highlight-box">
-                    <h5>Key Realization</h5>
-                    <p>"It would all have different applications, some with some without" - This simple statement unlocked iTabs' true potential as a flexible platform rather than a rigid tool.</p>
+                <div class="tab-content" id="workarounds-tab-2">
+                    <h4>Seven Painful Workarounds Users Currently Use:</h4>
+                    <ol>
+                        <li><strong>Multi-page designs:</strong> Exploit Canva's 200-page max, create navigation manually</li>
+                        <li><strong>Magic Resize:</strong> Repurpose content across multiple formats (still not interactive)</li>
+                        <li><strong>Export to Figma → ProtoPie:</strong> Convert to interactive prototypes (requires learning 2 new tools)</li>
+                        <li><strong>Rebuild in Webflow/Readymag:</strong> Start from scratch in web builders (1+ month learning curve)</li>
+                        <li><strong>Manual HTML/CSS:</strong> Code everything by hand (defeats purpose of using Canva)</li>
+                        <li><strong>Interactive PDFs:</strong> Limited functionality, poor mobile experience</li>
+                        <li><strong>Instagram-style carousels:</strong> Break content into slides (users hate swiping through 10+ slides)</li>
+                    </ol>
+                    <p>Every single workaround requires exporting from Canva and rebuilding elsewhere. None are elegant.</p>
                 </div>
                 
-                <p>This flexibility becomes iTabs' competitive advantage - meeting businesses where they are instead of forcing them to change their entire digital strategy.</p>`
-            },
-            details: {
-                content: `<h4>Business-Specific Applications</h4>
-                
-                <p><strong>Alliance AMS (Automotive Parts):</strong></p>
-                <ul>
-                    <li>On-site enhancement for existing website</li>
-                    <li>SmartLinks for sales team email communication</li>
-                    <li>Standalone pages for social media product promotion</li>
-                </ul>
-                
-                <p><strong>Content Creators/Bloggers:</strong></p>
-                <ul>
-                    <li>Standalone iTabs pages for affiliate marketing</li>
-                    <li>SmartLinks in YouTube video descriptions</li>
-                    <li>Enhanced article links for better reader experience</li>
-                </ul>
-                
-                <p><strong>B2B Sales Teams:</strong></p>
-                <ul>
-                    <li>SmartLinks for proposal follow-ups</li>
-                    <li>Standalone pages for product presentations</li>
-                    <li>Email-optimized product information sharing</li>
-                </ul>`
-            },
-            impact: {
-                content: `<h4>Market Positioning Advantage</h4>
-                
-                <p><strong>Traditional Approach:</strong> "Here's our solution, adapt your business to use it"</p>
-                <p><strong>iTabs Approach:</strong> "Here are multiple ways to enhance your information sharing - choose what works for you"</p>
-                
-                <div class="highlight-box">
-                    <h5>Competitive Differentiation</h5>
-                    <p>While competitors offer rigid solutions, iTabs provides a flexible platform that grows with businesses and adapts to their evolving needs.</p>
+                <div class="tab-content" id="workarounds-tab-3">
+                    <h4>What Users Are Actually Saying:</h4>
+                    <p><em>"Canva is great for static, but limited for web."</em> - Reddit r/webdev</p>
+                    <p><em>"Took over a month to learn Webflow basics as alternative."</em> - Designer News</p>
+                    <p><em>"How do I make my Canva designs interactive?"</em> - Asked repeatedly across forums</p>
+                    <p><em>"Need something between Canva's simplicity and Webflow's power."</em> - Common theme</p>
+                    <p><em>"My interactive design doesn't work on mobile."</em> - Consistent complaint</p>
+                    <div class="stat-box">
+                        <div class="stat-label">
+                            <strong>The Search Volume:</strong><br>
+                            "How to make Canva interactive" + "Canva alternatives for web" + "Add interactivity to Canva"<br>
+                            = Thousands of frustrated users every month
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Competitors Modal -->
+    <div id="competitors" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>The Competition Landscape</h3>
+                <span class="close" onclick="closeModal('competitors')">&times;</span>
+            </div>
+            <div class="modal-tabs">
+                <button class="tab active" onclick="showTab('competitors', 1)">🔗 Integrations</button>
+                <button class="tab" onclick="showTab('competitors', 2)">💰 Platforms</button>
+                <button class="tab" onclick="showTab('competitors', 3)">📊 Analysis</button>
+            </div>
+            <div class="modal-body">
+                <div class="tab-content active" id="competitors-tab-1">
+                    <h4>External Tools Canva Users Actually Use:</h4>
+                    <p><strong>ThingLink</strong> - 8 million creators adding interactive hotspots to Canva images. Upload → Add tags → Done. Popular in education. Pricing: Free to $60/year for educators.</p>
+                    <p><strong>Genially</strong> - Official Canva partnership with bidirectional integration. 30M+ users, 1,100+ templates. Export from Canva → Add interactivity in Genially. $10-50/month.</p>
+                    <p><strong>Issuu</strong> - Native Canva integration for interactive flipbooks. One-click publishing from Canva. Game-changer for catalogs and magazines.</p>
+                    <p><strong>Visme</strong> - Both competitor and complement. Interactive charts, popups, hover effects. $12.25-24.75/month. Steeper learning curve than Canva.</p>
+                    <h4>The Pattern:</h4>
+                    <p>Every solution requires <span class="highlight">exporting from Canva and rebuilding elsewhere</span>. No seamless workflow exists.</p>
                 </div>
                 
-                <p>This positions iTabs as essential infrastructure rather than just another tool - it becomes part of how businesses communicate about their products and services.</p>`
-            },
-            nextSteps: {
-                content: `<h4>Platform Development Strategy</h4>
+                <div class="tab-content" id="competitors-tab-2">
+                    <h4>Full Platform Competitors:</h4>
+                    <p><strong>Webflow</strong> ($14-79+/month) - "Photoshop of web design." Unlimited power, but 1+ month learning curve. Users say: "Too complex for non-developers."</p>
+                    <p><strong>Readymag</strong> - Middle ground between Canva and Webflow. Creative websites, 5,000+ fonts. Popular with designers for portfolios.</p>
+                    <p><strong>Tilda</strong> - 450+ pre-designed blocks. Easier than Webflow, less flexible. ~$10-13/month. Good for marketing sites.</p>
+                    <p><strong>Framer</strong> - $5/site/month. Between Canva's simplicity and Webflow's complexity. Growing fast.</p>
+                    <h4>The Gap They All Miss:</h4>
+                    <p>Nobody bridges Canva's ease-of-use with true interactivity at affordable pricing for non-developers.</p>
+                </div>
                 
-                <p><strong>Build for Flexibility from Day One:</strong></p>
-                <ul>
-                    <li>Modular architecture supporting multiple output formats</li>
-                    <li>Content management system that generates all approaches</li>
-                    <li>Analytics dashboard tracking success across implementations</li>
-                </ul>
+                <div class="tab-content" id="competitors-tab-3">
+                    <h4>Competitive Analysis Summary:</h4>
+                    <p><strong>Closest to the solution:</strong></p>
+                    <ul>
+                        <li>Genially - Official integration, 30M users, but still requires rebuild</li>
+                        <li>ThingLink - 8M creators, simple hotspots, education-focused</li>
+                        <li>Visme - Interactive elements, competitive pricing, but not Canva-workflow</li>
+                    </ul>
+                    <p><strong>None fully solve:</strong> Seamless static-to-interactive conversion while preserving design intent and working perfectly on mobile.</p>
+                    <div class="stat-box">
+                        <div class="stat-label">
+                            <strong>Market Validation:</strong><br>
+                            If these tools capture millions of users despite clunky workflows,<br>
+                            imagine a solution that actually integrates seamlessly.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pricing Modal -->
+    <div id="pricing" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>The Pricing Sweet Spot</h3>
+                <span class="close" onclick="closeModal('pricing')">&times;</span>
+            </div>
+            <div class="modal-tabs">
+                <button class="tab active" onclick="showTab('pricing', 1)">💵 Market Tiers</button>
+                <button class="tab" onclick="showTab('pricing', 2)">🎯 The Gap</button>
+                <button class="tab" onclick="showTab('pricing', 3)">📈 Strategy</button>
+            </div>
+            <div class="modal-body">
+                <div class="tab-content active" id="pricing-tab-1">
+                    <h4>Current Market Pricing Tiers:</h4>
+                    <p><strong>Value Tier ($0-15/month):</strong></p>
+                    <ul>
+                        <li>Canva Pro: $12.99 - Basic features, individual creators</li>
+                        <li>Adobe Express: $9.99 - Static design focus</li>
+                        <li>Snappa Pro: $10 - Simple graphics</li>
+                    </ul>
+                    <p><strong>Professional Tier ($15-40/month):</strong></p>
+                    <ul>
+                        <li>Visme: $12.25-24.75 - Interactive charts, small teams</li>
+                        <li>Webflow Basic/CMS: $14-23 - Entry-level interactivity</li>
+                        <li>VistaCreate: $13 - Design + basic animation</li>
+                    </ul>
+                    <p><strong>Enterprise Tier ($40-100+/month):</strong></p>
+                    <ul>
+                        <li>Webflow Business/E-commerce: $39-79 - Full features</li>
+                        <li>Bubble: $29+ - No-code apps</li>
+                        <li>Glide: $60 for 3 apps - Mobile app builder</li>
+                    </ul>
+                </div>
                 
-                <p><strong>Business Development Focus:</strong></p>
-                <ul>
-                    <li>Start with businesses that need one approach well</li>
-                    <li>Demonstrate success and expand to additional methods</li>
-                    <li>Use flexibility as the key selling proposition</li>
-                </ul>`
-            }
-        },
+                <div class="tab-content" id="pricing-tab-2">
+                    <h4>Where the Gap Sits:</h4>
+                    <p>Users consistently say: <em>"Webflow e-commerce at $79/month is too expensive. Shopify is $29."</em></p>
+                    <p>And: <em>"I need affordable interactive content tools for small business budgets."</em></p>
+                    <div class="stat-box">
+                        <div class="stat-number">$15-30/month</div>
+                        <div class="stat-label">The Underserved Sweet Spot</div>
+                    </div>
+                    <p>This range offers:</p>
+                    <ul>
+                        <li>✅ More than basic static design (Canva)</li>
+                        <li>✅ True interactivity (popups, layers, tooltips)</li>
+                        <li>✅ Less complexity than Webflow</li>
+                        <li>✅ Affordable for small businesses and creators</li>
+                    </ul>
+                    <p>Nobody currently owns this space with a complete solution.</p>
+                </div>
+                
+                <div class="tab-content" id="pricing-tab-3">
+                    <h4>Winning Pricing Strategy:</h4>
+                    <p><strong>Freemium Model:</strong> Like Canva, offer free basic plan to reduce adoption friction, then upsell advanced features.</p>
+                    <p><strong>Pro Tier ($19-29/month):</strong></p>
+                    <ul>
+                        <li>Unlimited interactive projects</li>
+                        <li>Custom branding</li>
+                        <li>Advanced popup templates</li>
+                        <li>Analytics dashboard</li>
+                        <li>Priority support</li>
+                    </ul>
+                    <p><strong>Team Tier ($39-49/month):</strong></p>
+                    <ul>
+                        <li>Multi-user collaboration</li>
+                        <li>Shared asset libraries</li>
+                        <li>Advanced integrations</li>
+                        <li>White-label options</li>
+                    </ul>
+                    <p><strong>Educational Discount:</strong> Follow ThingLink/Genially model - $4.99-12.49/month for teachers. Education sector is a major growth driver.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Proof Modal -->
+    <div id="proof" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Why iTabs Actually Works</h3>
+                <span class="close" onclick="closeModal('proof')">&times;</span>
+            </div>
+            <div class="modal-tabs">
+                <button class="tab active" onclick="showTab('proof', 1)">🧠 Psychology</button>
+                <button class="tab" onclick="showTab('proof', 2)">📱 This Page</button>
+                <button class="tab" onclick="showTab('proof', 3)">🚀 Applications</button>
+            </div>
+            <div class="modal-body">
+                <div class="tab-content active" id="proof-tab-1">
+                    <h4>The Instagram Principle:</h4>
+                    <p>Instagram figured out something fundamental: <strong>people want control over information flow.</strong></p>
+                    <ul>
+                        <li>Scroll through images at YOUR pace</li>
+                        <li>Stop when something interests you</li>
+                        <li>Tap for more info if you want</li>
+                        <li>Keep scrolling if you don't</li>
+                        <li><strong>YOU control how deep you go</strong></li>
+                    </ul>
+                    <p>iTabs applies this to ANY content - not just photos.</p>
+                    <h4>Progressive Disclosure:</h4>
+                    <p>UX research from Nielsen Norman Group shows people process information better when they can:</p>
+                    <ul>
+                        <li>See the essentials first</li>
+                        <li>Dive deeper only when curious</li>
+                        <li>Skip what doesn't matter to them</li>
+                    </ul>
+                    <p>That's exactly what these blue "i" buttons do.</p>
+                </div>
+                
+                <div class="tab-content" id="proof-tab-2">
+                    <h4>This Page Proves the Concept:</h4>
+                    <p>Think about your behavior for the last few minutes:</p>
+                    <ol>
+                        <li>You saw headlines that interested you</li>
+                        <li>You clicked blue "i" buttons selectively</li>
+                        <li>You explored tabs within popups</li>
+                        <li>You closed popups when done</li>
+                        <li>You moved on to the next topic</li>
+                    </ol>
+                    <p><strong>Would you have read 5,000 words of research?</strong> Probably not.</p>
+                    <p><strong>Did you explore the parts that mattered to you?</strong> Yes.</p>
+                    <div class="stat-box">
+                        <div class="stat-label">
+                            You just experienced progressive disclosure in action.<br>
+                            And it felt natural, didn't it?
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="tab-content" id="proof-tab-3">
+                    <h4>Where iTabs Can Transform Content:</h4>
+                    <p><strong>Crowdfunding Campaigns:</strong> Instead of walls of text, campaigns show photos with "i" buttons revealing: The Crisis, Who Needs Help, Where Money Goes, Why Now.</p>
+                    <p><strong>Product Catalogs:</strong> Alliance AMS could show brake pads with "i" buttons revealing: Specifications, Compatibility, Installation Tips, Warranty Info.</p>
+                    <p><strong>Training Materials:</strong> Replace 50-page PDFs with visual guides where learners click "i" for detailed explanations only when they need them.</p>
+                    <p><strong>Portfolio Websites:</strong> Designers show project thumbnails with "i" buttons revealing: Client Brief, Solution Approach, Results, Technologies Used.</p>
+                    <p><strong>Real Estate Listings:</strong> Property photos with "i" buttons showing: Room Dimensions, Recent Upgrades, Energy Costs, Neighborhood Stats.</p>
+                    <h4>The Universal Truth:</h4>
+                    <p><span class="highlight">People don't want to read everything. They want to explore what interests them.</span></p>
+                    <p>iTabs gives them that power.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openModal(modalId) {
+            document.getElementById(modalId).style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
         
-        'use-cases': {
-            title: 'Use Cases & Applications',
-            overview: {
-                content: `<h4>Diverse Application Scenarios</h4>
-                <p>Our conversation evolved from simple product enhancement to recognizing iTabs' potential across multiple contexts - from automotive catalogs to content marketing to sales communication.</p>
-                
-                <div class="highlight-box">
-                    <h5>Universal Information Challenge</h5>
-                    <p>Every business with complex products or services faces the same problem: how to share detailed information without overwhelming or losing their audience.</p>
-                </div>`
-            },
-            details: {
-                content: `<h4>Proven Application Categories</h4>
-                
-                <p><strong>E-commerce & Product Catalogs:</strong></p>
-                <ul>
-                    <li>Transform cryptic part numbers into customer-friendly information</li>
-                    <li>Reduce support calls with self-service product details</li>
-                    <li>Improve conversion rates through better product understanding</li>
-                </ul>
-                
-                <p><strong>Content Marketing & Education:</strong></p>
-                <ul>
-                    <li>Enhanced blog articles with contextual product information</li>
-                    <li>YouTube video descriptions with organized product links</li>
-                    <li>Educational content that becomes actionable</li>
-                </ul>
-                
-                <p><strong>Sales & Customer Communication:</strong></p>
-                <ul>
-                    <li>Email follow-ups with specific product information</li>
-                    <li>Proposal attachments that provide comprehensive details</li>
-                    <li>Social media sharing with organized product specifications</li>
-                </ul>`
-            },
-            impact: {
-                content: `<h4>Cross-Industry Transformation</h4>
-                
-                <p><strong>Immediate Impact Areas:</strong></p>
-                <ul>
-                    <li><strong>Automotive Parts:</strong> Alliance AMS's 50,000+ products become searchable and understandable</li>
-                    <li><strong>Industrial Equipment:</strong> Complex machinery specifications organized for decision-makers</li>
-                    <li><strong>Technical Services:</strong> Service descriptions with clear pricing and process information</li>
-                </ul>
-                
-                <div class="highlight-box">
-                    <h5>Network Effects</h5>
-                    <p>As more businesses adopt iTabs, customers begin expecting organized, accessible product information everywhere - creating market pressure for universal adoption.</p>
-                </div>`
-            },
-            nextSteps: {
-                content: `<h4>Application Development Priority</h4>
-                
-                <p><strong>Start with Alliance AMS Success:</strong></p>
-                <ul>
-                    <li>Prove automotive parts catalog transformation</li>
-                    <li>Measure customer engagement and conversion improvements</li>
-                    <li>Document case study for similar businesses</li>
-                </ul>
-                
-                <p><strong>Expand to Content Marketing:</strong></p>
-                <ul>
-                    <li>Partner with automotive bloggers and YouTubers</li>
-                    <li>Demonstrate affiliate marketing improvements</li>
-                    <li>Create templates for different content types</li>
-                </ul>
-                
-                <p><strong>Scale Across Industries:</strong></p>
-                <ul>
-                    <li>Identify similar catalog-heavy businesses</li>
-                    <li>Develop industry-specific templates</li>
-                    <li>Build platform for multi-business hosting</li>
-                </ul>`
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+        
+        window.onclick = function(event) {
+            const modals = document.getElementsByClassName('modal');
+            for (let modal of modals) {
+                if (event.target == modal) {
+                    modal.style.display = 'none';
+                    document.body.style.overflow = 'auto';
+                }
             }
         }
-    };
-    
-    function openItabs(topic) {
-        const data = itabsData[topic];
-        if (!data) return;
         
-        // Update popup title
-        document.getElementById('popupTitle').textContent = data.title;
-        
-        // Populate tab contents
-        document.getElementById('overviewContent').innerHTML = data.overview.content;
-        document.getElementById('detailsContent').innerHTML = data.details.content;
-        document.getElementById('impactContent').innerHTML = data.impact.content;
-        document.getElementById('nextStepsContent').innerHTML = data.nextSteps.content;
-        
-        // Reset to first tab
-        document.querySelectorAll('.popup-tab').forEach(tab => tab.classList.remove('active'));
-        document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-        document.querySelector('.popup-tab').classList.add('active');
-        document.getElementById('overview').classList.add('active');
-        
-        // Show overlay
-        document.getElementById('itabsOverlay').classList.add('active');
-    }
-    
-    function closeItabs() {
-        document.getElementById('itabsOverlay').classList.remove('active');
-    }
-    
-    function switchTab(tabElement, tabName) {
-        // Remove active from all tabs and contents
-        document.querySelectorAll('.popup-tab').forEach(tab => tab.classList.remove('active'));
-        document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-        
-        // Add active to clicked tab and corresponding content
-        tabElement.classList.add('active');
-        document.getElementById(tabName).classList.add('active');
-    }
-    
-    // Close on Escape key
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            closeItabs();
+        function showTab(modalId, tabNumber) {
+            const modal = document.getElementById(modalId);
+            const tabs = modal.getElementsByClassName('tab');
+            const contents = modal.getElementsByClassName('tab-content');
+            
+            for (let tab of tabs) {
+                tab.classList.remove('active');
+            }
+            for (let content of contents) {
+                content.classList.remove('active');
+            }
+            
+            tabs[tabNumber - 1].classList.add('active');
+            document.getElementById(modalId + '-tab-' + tabNumber).classList.add('active');
         }
-    });
-    
-    console.log('iTabs demo fully loaded with interactive functionality');
-</script>
-
+        
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                const modals = document.getElementsByClassName('modal');
+                for (let modal of modals) {
+                    if (modal.style.display === 'block') {
+                        modal.style.display = 'none';
+                        document.body.style.overflow = 'auto';
+                    }
+                }
+            }
+        });
+    </script>
 </body>
 </html>
