@@ -34,7 +34,10 @@ ITABS_PATTERNS = [
 ]
 
 
-def request(method, path, body=None, raw=False, tries=4):
+PAUSE = float(os.environ.get("VALTOWN_PAUSE", "0.7"))  # seconds between calls; Val Town rate-limits
+
+
+def request(method, path, body=None, raw=False, tries=8):
     url = path if path.startswith("http") else API + path
     data = json.dumps(body).encode() if body is not None else None
     headers = {"Authorization": f"Bearer {TOKEN}", "User-Agent": "valtown-backup"}
@@ -42,13 +45,17 @@ def request(method, path, body=None, raw=False, tries=4):
         headers["Content-Type"] = "application/json"
     for attempt in range(tries):
         req = urllib.request.Request(url, data=data, method=method, headers=headers)
+        time.sleep(PAUSE)
         try:
             with urllib.request.urlopen(req, timeout=60) as r:
                 content = r.read()
                 return content if raw else json.loads(content or b"null")
         except urllib.error.HTTPError as e:
             if e.code == 429 or e.code >= 500:
-                time.sleep(2 ** (attempt + 1))
+                wait = e.headers.get("Retry-After")
+                wait = int(wait) if wait and wait.isdigit() else min(15 * (attempt + 1), 90)
+                print(f"    HTTP {e.code}, waiting {wait}s", flush=True)
+                time.sleep(wait)
                 continue
             raise
         except urllib.error.URLError:
@@ -114,16 +121,21 @@ def backup_vals(out, me, log):
             if ftype == "directory":
                 os.makedirs(os.path.join(vdir, safe_relpath(f["path"])), exist_ok=True)
                 continue
+            local = os.path.join(vdir, safe_relpath(f["path"]))
             try:
-                content = get(f"/v2/vals/{v['id']}/files/content?"
-                              + urllib.parse.urlencode({"path": f["path"]}), raw=True)
-                write(os.path.join(vdir, safe_relpath(f["path"])), content)
+                if os.path.exists(local):  # resume: already downloaded on an earlier run
+                    with open(local, "rb") as fh:
+                        content = fh.read()
+                else:
+                    content = get(f"/v2/vals/{v['id']}/files/content?"
+                                  + urllib.parse.urlencode({"path": f["path"]}), raw=True)
+                    write(local, content)
                 try:
                     texts.append(content.decode())
                 except UnicodeDecodeError:
                     pass
-            except urllib.error.HTTPError as e:
-                errors.append(f"{f['path']}: HTTP {e.code}")
+            except (urllib.error.HTTPError, RuntimeError) as e:
+                errors.append(f"{f['path']}: {e}")
         types = sorted({f["type"] for f in files if f["type"] not in ("directory", "file")})
         endpoints = [f["links"]["endpoint"] for f in files if f["links"].get("endpoint")]
         haystack = " ".join([name, v.get("description") or ""] + texts + endpoints).lower()
@@ -170,8 +182,9 @@ def backup_blobs(out, log):
     for b in items:
         key = b["key"]
         local = safe_relpath(key)
-        content = get("/v1/blob/" + urllib.parse.quote(key, safe=""), raw=True)
-        write(os.path.join(bdir, local), content)
+        path = os.path.join(bdir, local)
+        if not os.path.exists(path):
+            write(path, get("/v1/blob/" + urllib.parse.quote(key, safe=""), raw=True))
         index.append({"key": key, "file": local, "size": b.get("size"),
                       "last_modified": b.get("lastModified")})
     write(os.path.join(bdir, "_index.json"), json.dumps(index, indent=2))
