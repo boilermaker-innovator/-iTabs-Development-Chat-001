@@ -15,6 +15,7 @@ Writes, inside OUTPUT_DIR:
     README.md                   val list with live URLs, type and iTabs flag
     manifest.json               machine-readable summary
 """
+import http.client
 import json
 import os
 import re
@@ -58,8 +59,9 @@ def request(method, path, body=None, raw=False, tries=8):
                 time.sleep(wait)
                 continue
             raise
-        except urllib.error.URLError:
-            time.sleep(2 ** (attempt + 1))
+        except (urllib.error.URLError, OSError, http.client.HTTPException) as e:
+            print(f"    network error ({e}), retrying", flush=True)
+            time.sleep(min(15 * (attempt + 1), 90))
     raise RuntimeError(f"giving up on {method} {url}")
 
 
