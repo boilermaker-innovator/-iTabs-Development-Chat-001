@@ -194,6 +194,26 @@ def backup_blobs(out, log):
     return index
 
 
+ORDERING = {r"\border", r"\bcart\b", r"checkout", r"queue"}
+VENUE = {r"\bmenu", r"caf[eé]", r"coffee", r"espresso", r"latte", r"food ?hall", r"stall"}
+
+
+def priority(v):
+    """1 = live ordering/menu site (move first), 2 = other live iTabs page, 0 = not flagged."""
+    sig = set(v["itabs_signals"])
+    live = "http" in v["types"]
+    if not live or not sig:
+        return 0
+    if r"demo\.itabs\.co" in sig or (sig & ORDERING and sig & VENUE):
+        return 1
+    return 2 if (r"itabs" in sig or sig & VENUE or sig & ORDERING) else 0
+
+
+def label(pattern):
+    return (pattern.replace("\\b", "").replace("\\.", ".").replace("caf[eé]", "café")
+            .replace(" ?", " ").replace("[-_ ]?", " "))
+
+
 def kind(v):
     t = set(v["types"])
     labels = [l for k, l in (("http", "HTTP endpoint"), ("interval", "Cron job"),
@@ -202,35 +222,50 @@ def kind(v):
 
 
 def readme(me, vals, tables, blobs, warnings):
-    itabs = [v for v in vals if v["itabs_signals"]]
+    for v in vals:
+        v["priority"] = priority(v)
+    p1 = [v for v in vals if v["priority"] == 1]
+    p2 = [v for v in vals if v["priority"] == 2]
     lines = [
         f"# Val Town backup — {me.get('username')}",
         "",
         f"Taken {time.strftime('%Y-%m-%d %H:%M UTC', time.gmtime())}, read-only, before Val Town "
         "goes read-only on 10 Dec 2026.",
         "",
-        f"- **{len(vals)} vals**, {sum(v['file_count'] for v in vals)} files",
-        f"- **{len(tables)} SQLite tables** in `sqlite/` (schema in `sqlite/schema.sql`)",
-        f"- **{len(blobs)} blobs** in `blobs/` (index in `blobs/_index.json`)",
+        f"- **{len(vals)} vals**, {sum(v['file_count'] for v in vals)} files, one folder each under `vals/`",
+        f"- **{len(tables)} SQLite tables** in `sqlite/`",
+        f"- **{len(blobs)} blobs** in `blobs/` (key → file map in `blobs/_index.json`)",
+        f"- **{len(p1)} look like live iTabs ordering/menu sites** (move first), "
+        f"{len(p2)} more are other live iTabs pages",
         "",
         "Not included (the API doesn't return them): environment variable *values*. "
         "Note those down from each val's settings before 10 Dec.",
         "",
-        "## Move first: looks like a live iTabs site",
+        "Flags are a keyword guess from each val's name and code — check before relying on them.",
         "",
-        "| Val | Live URL | Type | Why flagged |",
-        "|---|---|---|---|",
     ]
-    for v in sorted(itabs, key=lambda v: (-len(v["itabs_signals"]), v["name"].lower())):
-        url = "<br>".join(v["endpoints"]) or "—"
-        why = ", ".join(s.replace("\\b", "").replace("\\", "") for s in v["itabs_signals"])
-        lines.append(f"| [{v['name']}](vals/{v['folder']}) | {url} | {kind(v)} | {why} |")
-    if not itabs:
-        lines.append("| — | — | — | none matched |")
-    lines += ["", "## All vals", "", "| | Val | Live URL | Type | Privacy | Files |", "|---|---|---|---|---|---|"]
-    for v in sorted(vals, key=lambda v: v["name"].lower()):
+
+    def table(title, rows, blurb):
+        out = [f"## {title}", "", blurb, "", "| Val | Live URL | Type | Signals |", "|---|---|---|---|"]
+        for v in sorted(rows, key=lambda v: v["name"].lower()):
+            url = "<br>".join(v["endpoints"]) or "—"
+            why = ", ".join(label(s) for s in v["itabs_signals"])
+            out.append(f"| [{v['name']}](vals/{v['folder']}) | {url} | {kind(v)} | {why} |")
+        if not rows:
+            out.append("| — | — | — | — |")
+        return out + [""]
+
+    lines += table("1. Move first — live iTabs ordering / menu sites", p1,
+                   "HTTP endpoints whose code has both ordering words (order, cart, checkout, queue) "
+                   "and venue words (menu, café, coffee…), or that mention demo.itabs.co.")
+    lines += table("2. Then — other live iTabs pages", p2,
+                   "HTTP endpoints that mention iTabs or venues but don't look like an ordering flow "
+                   "(cards, teasers, tools, demos).")
+    lines += ["## All vals", "", "| Priority | Val | Live URL | Type | Privacy | Files |",
+              "|---|---|---|---|---|---|"]
+    for v in sorted(vals, key=lambda v: (v["priority"] or 9, v["name"].lower())):
         url = "<br>".join(v["endpoints"]) or (v["html_url"] or "—")
-        flag = "⭐ iTabs" if v["itabs_signals"] else ""
+        flag = {1: "⭐ 1 move first", 2: "2"}.get(v["priority"], "")
         lines.append(f"| {flag} | [{v['name']}](vals/{v['folder']}) | {url} | {kind(v)} | "
                      f"{v['privacy'] or ''} | {v['file_count']} |")
     if warnings:
