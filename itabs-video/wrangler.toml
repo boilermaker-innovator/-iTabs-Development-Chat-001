@@ -1,5 +1,5 @@
 # iTabs This Video: Cloudflare Worker config
-name = "itabs-video"
+name = "itabs-this-video"
 main = "src/worker.js"
 compatibility_date = "2026-11-01"
 workers_dev = true
@@ -7,12 +7,12 @@ workers_dev = true
 # Lets the worker import the .html files as text
 rules = [{ type = "Text", globs = ["**/*.html"], fallthrough = true }]
 
-# Where finished decks are stored.
-# Run:  npx wrangler kv namespace create DECKS
-# then paste the id it prints over the placeholder below.
+# Where finished decks are stored (Cloudflare KV).
+# Replace PASTE-KV-ID-HERE with the ID of your KV namespace
+# (Cloudflare dashboard > Storage & databases > Workers KV > copy the ID).
 [[kv_namespaces]]
 binding = "DECKS"
-id = "PASTE_YOUR_KV_NAMESPACE_ID_HERE"
+id = "PASTE-KV-ID-HERE"
 
 [vars]
 # "auto" = use the newest Gemini Flash model your key can see.
@@ -22,8 +22,8 @@ GEMINI_MODEL = "auto"
 [observability]
 enabled = true
 
-# The Gemini key is a secret, never stored here:
-#   npx wrangler secret put GEMINI_API_KEY
+# The Gemini key is NOT stored here. Add it in the Cloudflare dashboard:
+# Worker > Settings > Variables and Secrets > Add > Type: Secret > GEMINI_API_KEY
 
 # Later, for the custom domain:
 # routes = [{ pattern = "video.itabs.co", custom_domain = true }]
