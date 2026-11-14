@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>iTabs This Video</title>
+<meta name="description" content="Paste any YouTube link, say who's watching, and get a swipeable iTabs deck applied to you.">
+<meta name="theme-color" content="#0b0c0f">
+<style>
+:root{--bg:#0b0c0f;--card:#16181d;--raised:#23262d;--line:#2e323a;--fg:#f4f5f7;--muted:#a3a8b3;--gold:#f59e0b;--blue:#1e3a8a;--bluedot:#60a5fa;--red:#f87171;color-scheme:dark}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--fg);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.5;min-height:100vh;min-height:100dvh}
+.wrap{max-width:460px;margin:0 auto;padding:28px 16px calc(24px + env(safe-area-inset-bottom,0px));min-height:100vh;min-height:100dvh;display:flex;flex-direction:column}
+.brand{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:var(--muted);letter-spacing:.02em}
+.brand i{width:22px;height:22px;border-radius:50%;background:var(--gold);color:#000;display:grid;place-items:center;font:italic 700 13px Georgia,serif}
+h1{font-size:30px;line-height:1.12;letter-spacing:-.02em;margin:18px 0 8px;text-wrap:balance}
+h1 span{color:var(--gold)}
+.lead{color:var(--muted);font-size:15px;margin-bottom:22px}
+form{display:flex;flex-direction:column;gap:16px}
+label{display:block;font-size:13px;font-weight:600;margin-bottom:6px}
+label small{font-weight:400;color:var(--muted)}
+input,textarea,select{width:100%;background:var(--card);color:var(--fg);border:1px solid var(--line);border-radius:12px;padding:13px 14px;font:16px/1.4 inherit;font-family:inherit;outline:none;transition:border-color .15s}
+textarea{resize:vertical;min-height:88px}
+input:focus,textarea:focus,select:focus{border-color:var(--bluedot)}
+select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);background-position:calc(100% - 20px) 55%,calc(100% - 15px) 55%;background-size:5px 5px;background-repeat:no-repeat}
+.count{font-size:12px;color:var(--muted);text-align:right;margin-top:4px}
+.count.over{color:var(--red)}
+.note{font-size:12.5px;color:var(--muted);display:flex;gap:6px;align-items:center}
+.note b{color:var(--gold)}
+.go{background:var(--gold);color:#000;border:0;border-radius:14px;padding:15px;font:700 17px inherit;font-family:inherit;cursor:pointer;transition:transform .1s,opacity .15s}
+.go:active{transform:scale(.98)}.go:disabled{opacity:.5}
+.err{background:#3b1414;border:1px solid #7f1d1d;color:#fecaca;border-radius:12px;padding:12px 14px;font-size:14px}
+.tr{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px}
+.tr h3{font-size:15px;margin-bottom:4px}.tr p{font-size:13px;color:var(--muted);margin-bottom:10px}
+.tr textarea{min-height:160px;background:var(--bg)}
+.loading{display:flex;flex-direction:column;align-items:center;text-align:center;gap:14px;padding:48px 0}
+.dots{display:flex;gap:8px}.dots i{width:12px;height:12px;border-radius:50%;background:var(--gold);animation:b 1.2s infinite ease-in-out}
+.dots i:nth-child(2){animation-delay:.15s;background:var(--bluedot)}.dots i:nth-child(3){animation-delay:.3s}
+@keyframes b{0%,80%,100%{transform:scale(.5);opacity:.4}40%{transform:scale(1);opacity:1}}
+.loading .msg{font-size:18px;font-weight:600}.loading small{color:var(--muted);font-size:13px}
+.done{display:flex;flex-direction:column;gap:14px;padding-top:6px}
+.done h2{font-size:22px}
+.linkbox{display:flex;gap:8px}
+.linkbox input{font-size:14px;color:var(--bluedot)}
+.btn{border:0;border-radius:12px;padding:12px 16px;font:600 15px inherit;font-family:inherit;cursor:pointer;text-align:center;text-decoration:none;white-space:nowrap}
+.btn.copy{background:var(--blue);color:#fff}.btn.open{background:var(--gold);color:#000;display:block}.btn.again{background:var(--raised);color:var(--fg)}
+.foot{margin-top:auto;padding-top:32px;text-align:center;font-weight:600;font-size:12px}.foot small{font-weight:400;font-size:11.5px;color:var(--muted)}
+[hidden]{display:none!important}
+</style></head><body>
+<div class="wrap">
+ <div class="brand"><i>i</i>iTabs This Video</div>
+ <h1>Any YouTube video, <span>applied to you.</span></h1>
+ <p class="lead">Paste a link, say who's watching, and AI turns the video into swipeable cards made for you.</p>
+
+ <form id="form" novalidate>
+  <div><label for="url">YouTube link</label>
+   <input id="url" type="url" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="https://youtu.be/…" required></div>
+  <div><label for="about">Who's watching? <small>a short description</small></label>
+   <textarea id="about" maxlength="300" placeholder="e.g. I run a coffee van in Perth" required></textarea>
+   <div class="count" id="count">0 / 300</div></div>
+  <div><label for="lang">Language</label>
+   <select id="lang">
+    <option value="en" selected>English</option>
+    <option value="id">Indonesian · Bahasa Indonesia</option>
+    <option value="zh">Chinese · 中文</option>
+    <option value="vi">Vietnamese · Tiếng Việt</option>
+    <option value="es">Spanish · Español</option>
+    <option value="ar">Arabic · العربية</option>
+   </select></div>
+  <div class="tr" id="trBox" hidden>
+   <h3>Paste the transcript instead</h3>
+   <p>On YouTube, open the video description and tap <b>Show transcript</b>. Select all of it, copy, and paste it here.</p>
+   <textarea id="transcript" placeholder="Paste the transcript here…"></textarea>
+  </div>
+  <div class="err" id="err" role="alert" hidden></div>
+  <button class="go" id="go" type="submit">Make my iTabs</button>
+  <p class="note"><b>●</b> Don't type anything private.</p>
+ </form>
+
+ <div class="loading" id="loading" hidden aria-live="polite">
+  <div class="dots"><i></i><i></i><i></i></div>
+  <div class="msg" id="msg">Watching the video…</div>
+  <small>This usually takes 20–60 seconds. Keep this page open.</small>
+ </div>
+
+ <div class="done" id="done" hidden>
+  <h2>Your iTabs is ready 🎉</h2>
+  <a class="btn open" id="open" href="#">Open my iTabs</a>
+  <div class="linkbox"><input id="link" readonly aria-label="Deck link"><button class="btn copy" id="copy" type="button">Copy link</button></div>
+  <button class="btn again" id="again" type="button">Make another</button>
+ </div>
+
+ <div class="foot">Any YouTube video, applied to you. <small>· Made with <b>iTabs</b> · itabs.co</small></div>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+const about=$('about'),count=$('count');
+const upd=()=>{count.textContent=about.value.length+' / 300';count.classList.toggle('over',about.value.length>=300)};
+about.addEventListener('input',upd);
+function err(t){$('err').textContent=t;$('err').hidden=!t;if(t)$('err').scrollIntoView({block:'center',behavior:'smooth'})}
+function view(v){$('form').hidden=v!=='form';$('loading').hidden=v!=='loading';$('done').hidden=v!=='done';window.scrollTo(0,0)}
+const MSGS=['Watching the video…','Picking out the key points…','Applying it to you…','Writing your cards…','Nearly there…'];
+let timer;
+function startMsgs(transcript){let i=0;$('msg').textContent=transcript?'Reading the transcript…':MSGS[0];clearInterval(timer);timer=setInterval(()=>{i=Math.min(i+1,MSGS.length-1);$('msg').textContent=MSGS[i]},9000)}
+
+$('form').addEventListener('submit',async e=>{
+ e.preventDefault();err('');
+ const url=$('url').value.trim(),a=about.value.trim(),lang=$('lang').value,useTr=!$('trBox').hidden,tr=$('transcript').value.trim();
+ if(!url)return err('Paste a YouTube link first.');
+ if(!/(youtube\.com|youtu\.be)\//i.test(url)&&!/^[\w-]{11}$/.test(url))return err("That doesn't look like a YouTube link.");
+ if(!a)return err("Tell us a little about who's watching.");
+ if(useTr&&tr.length<200)return err('Paste the whole transcript into the box (it looks too short).');
+ view('loading');startMsgs(useTr);
+ let res,data;
+ try{
+  res=await fetch('/api/make',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({url,about:a,lang,transcript:useTr?tr:undefined})});
+  data=await res.json().catch(()=>({error:'The server sent back something unexpected. Please try again.'}));
+ }catch(x){data={error:'Connection lost. Check your internet and try again.'}}
+ clearInterval(timer);
+ if(data&&data.path){
+  const link=location.origin+data.path;$('link').value=link;$('open').href=data.path;view('done');return;
+ }
+ view('form');
+ if(data&&data.needTranscript){$('trBox').hidden=false;$('go').textContent='Try again with the transcript'}
+ err((data&&data.error)||'Something went wrong. Please try again.');
+});
+$('copy').onclick=async()=>{const v=$('link').value;try{await navigator.clipboard.writeText(v)}catch{$('link').select();document.execCommand('copy')}$('copy').textContent='Copied ✓';setTimeout(()=>$('copy').textContent='Copy link',1800)};
+$('again').onclick=()=>{$('url').value='';$('transcript').value='';$('trBox').hidden=true;$('go').textContent='Make my iTabs';err('');view('form');$('url').focus()};
+$('url').addEventListener('input',()=>{if(!$('trBox').hidden){$('trBox').hidden=true;$('go').textContent='Make my iTabs'}});
+</script></body></html>

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>iTabs | Personalised video</title>
+<style>
+:root{--bg:#0b0c0f;--card:#16181d;--raised:#23262d;--fg:#f4f5f7;--muted:#a3a8b3;--gold:#f59e0b;--blue:#1e3a8a;--bluedot:#60a5fa;color-scheme:dark}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--fg);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.5}
+.wrap{max-width:440px;margin:0 auto;height:100%;display:flex;flex-direction:column;padding:0 12px}
+.prog{display:flex;gap:4px;padding:8px 0 4px}.seg{flex:1;height:3px;border-radius:2px;background:#ffffff38}.seg.on{background:var(--fg)}
+.head{padding:4px 0 2px}.ch{font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ch span{font-weight:400;color:var(--muted)}.vt{display:none}
+.for{font-size:12px;color:var(--bluedot);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.key{display:flex;gap:12px;font-size:11px;color:var(--muted);padding:4px 0 6px}.key i{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:5px;vertical-align:-1px}
+.cards{flex:0 1 auto;position:relative;overflow:hidden;min-height:0;display:grid;align-items:start}
+.card{grid-area:1/1;display:flex;flex-direction:column;opacity:0;transform:translateX(100%);transition:.3s;pointer-events:none}
+.card.on{opacity:1;transform:none;pointer-events:auto}.card.prev{transform:translateX(-100%)}
+.in{display:flex;flex-direction:column;background:var(--card);border-radius:16px;overflow:hidden;max-height:calc(100vh - 230px)}
+.band{height:42px;display:flex;align-items:center;padding:0 14px;position:relative;flex-shrink:0}
+.band b{font-size:15px;line-height:1.1;color:#fff;max-width:72%;text-shadow:0 2px 10px #0006}
+.ts{position:absolute;top:50%;transform:translateY(-50%);right:12px;background:#000a;color:#fff;font-size:12px;font-weight:600;padding:3px 8px;border-radius:6px;text-decoration:none}
+.body{padding:12px 14px 14px;display:flex;flex-direction:column;flex:0 1 auto;overflow-y:auto;min-height:0}
+.num{font-size:10.5px;color:var(--bluedot);font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px}
+h2{font-size:19px;line-height:1.2;margin-bottom:6px}.sum{font-size:14.5px;color:var(--muted)}
+.btns{display:flex;flex-wrap:wrap;gap:6px;padding-top:12px}
+.ib{display:inline-flex;align-items:center;gap:7px;background:var(--raised);border:0;padding:6px 12px 6px 7px;border-radius:18px;font:500 13px inherit;font-family:inherit;color:var(--fg);cursor:pointer;position:relative;z-index:5}
+.ib span{width:19px;height:19px;border-radius:50%;background:var(--gold);color:#000;display:grid;place-items:center;font:italic 700 12px Georgia,serif}
+.ib.you{background:var(--blue)}.ib.you span{background:var(--bluedot)}
+.info{margin-top:10px;padding:10px 12px;border-radius:12px;background:var(--raised);border-left:3px solid var(--gold);font-size:14px;color:var(--fg);white-space:pre-line}
+.info.you{border-left-color:var(--bluedot);background:#1e3a8a66}
+.info .it{display:block;font-weight:700;font-size:13px;margin-bottom:4px;color:var(--gold);text-transform:uppercase;letter-spacing:.05em}
+.info.you .it{color:var(--bluedot)}
+.ib.act{outline:2px solid var(--fg);outline-offset:1px}
+.nav{position:absolute;top:0;bottom:0;width:22%;z-index:2}.nav.l{left:0}.nav.r{right:0}
+.foot{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 0 4px}
+.watch{background:#e11d1d;color:#fff;padding:7px 14px;border-radius:18px;text-decoration:none;font-weight:600;font-size:13px}
+.arr button{width:36px;height:36px;border-radius:50%;border:0;background:var(--raised);color:var(--fg);font-size:18px;margin-left:6px}
+.tag{text-align:center;font-weight:600;font-size:12px;padding-bottom:calc(10px + env(safe-area-inset-bottom,0px))}.tag small{font-weight:400;font-size:11.5px;color:var(--muted)}
+.ov{position:fixed;inset:0;background:#000c;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:.2s;z-index:20}.ov.on{opacity:1;pointer-events:auto}
+.modal{background:var(--card);width:100%;max-width:440px;max-height:78vh;border-radius:22px 22px 0 0;display:flex;flex-direction:column}
+.mh{padding:16px 18px;border-bottom:1px solid var(--raised);display:flex;justify-content:space-between;align-items:center;gap:10px}
+.badge{font-size:10.5px;padding:3px 8px;border-radius:4px;text-transform:uppercase;font-weight:700;background:var(--gold);color:#000;margin-left:8px}.badge.you{background:var(--bluedot);color:#0b1a3d}
+.mx{width:32px;height:32px;border-radius:50%;border:0;background:var(--raised);color:var(--fg);font-size:20px}
+.mb{padding:16px 18px 24px;overflow-y:auto;color:var(--muted);font-size:15.5px;white-space:pre-line}
+</style></head><body>
+<div class="wrap">
+ <div class="prog" id="prog"></div>
+ <div class="head"><div class="ch" id="ch"></div><div class="vt" id="vt"></div><div class="for" id="for"></div></div>
+ <div class="key"><span><i style="background:var(--gold)"></i>From the video</span><span><i style="background:var(--bluedot)"></i>For you</span></div>
+ <div class="cards" id="cards"><div class="nav l" id="nl"></div><div class="nav r" id="nr"></div></div>
+ <div class="foot"><a class="watch" id="watch" target="_blank" rel="noopener">▶ Watch video</a><div class="arr"><button id="bp" aria-label="Back">‹</button><button id="bn" aria-label="Next">›</button></div></div>
+ <div class="tag">Any YouTube video, applied to you. <small>· Made with <b>iTabs</b> · itabs.co</small></div>
+</div>
+<script>
+/* ===== ONLY EDIT THIS DATA BLOCK ===== */
+const DATA = {
+  videoTitle: "Video title",
+  channel: "Channel name",
+  videoId: "",            // the part after v= in the YouTube link, or "" if unknown
+  forWho: "a coffee van owner in Perth",
+  youLabel: "For you",    // label on the blue buttons, e.g. "For your van"
+  cards: [
+    { band: "Short visual label", colors: "#1e3a8a,#38bdf8", time: "1:15", seconds: 75,
+      headline: "Punchy headline, under 8 words",
+      summary: "Two or three plain sentences about this point from the video.",
+      buttons: [
+        { you: true, title: "For you", text: "What this means for them, with a concrete action.\n• Bullet\n• Bullet" },
+        { title: "Definition", type: "Definition", text: "Background from the video." }
+      ] }
+  ]
+};
+/* ===== END DATA BLOCK ===== */
+const $=id=>document.getElementById(id),esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+$('ch').textContent=DATA.channel;const sp=document.createElement('span');sp.textContent=' · '+DATA.videoTitle;$('ch').appendChild(sp);$('for').textContent=DATA.forWho?'Personalised for '+DATA.forWho:'';
+document.title='iTabs | '+DATA.videoTitle;
+const yt=DATA.videoId?'https://www.youtube.com/watch?v='+DATA.videoId:'';if(yt)$('watch').href=yt;else $('watch').hidden=true;
+let cur=0;const N=DATA.cards.length;
+DATA.cards.forEach((c,i)=>{const s=document.createElement('div');s.className='seg';$('prog').appendChild(s);
+ const el=document.createElement('div');el.className='card';
+ const t=c.time?(yt&&c.seconds?`<a class="ts" target="_blank" rel="noopener" href="${yt}&t=${c.seconds}s">▶ ${esc(c.time)}</a>`:`<span class="ts">${esc(c.time)}</span>`):'';
+ el.innerHTML=`<div class="in"><div class="band" style="background:linear-gradient(135deg,${c.colors||'#1e3a8a,#38bdf8'})"><b>${esc(c.band)}</b>${t}</div><div class="body"><div class="num">Point ${i+1} of ${N}</div><h2>${esc(c.headline)}</h2><p class="sum">${esc(c.summary)}</p><div class="btns">${(c.buttons||[]).map((b,j)=>`<button class="ib${b.you?' you':''}" data-i="${i}" data-j="${j}"><span>i</span>${esc(b.title||(b.you?DATA.youLabel:'Info'))}</button>`).join('')}</div><div class="info" hidden></div></div></div>`;
+ $('cards').insertBefore(el,$('nl'));});
+function show(i){document.querySelectorAll('.card').forEach((c,k)=>{c.classList.toggle('on',k===i);c.classList.toggle('prev',k<i)});document.querySelectorAll('.seg').forEach((s,k)=>s.classList.toggle('on',k<=i));cur=i}
+const go=d=>{const n=cur+d;if(n>=0&&n<N)show(n)};
+$('nl').onclick=()=>go(-1);$('nr').onclick=()=>go(1);$('bp').onclick=()=>go(-1);$('bn').onclick=()=>go(1);
+$('cards').addEventListener('click',e=>{const b=e.target.closest('.ib');if(!b)return;const card=b.closest('.card'),box=card.querySelector('.info'),x=DATA.cards[b.dataset.i].buttons[b.dataset.j];
+ const was=b.classList.contains('act');card.querySelectorAll('.ib').forEach(z=>z.classList.remove('act'));
+ if(was){box.hidden=true;return}
+ b.classList.add('act');box.className='info'+(x.you?' you':'');box.innerHTML='<span class="it"></span>';box.firstChild.textContent=x.you?DATA.youLabel:(x.type||'From the video');box.appendChild(document.createTextNode(x.text));box.hidden=false;box.scrollIntoView({block:'nearest',behavior:'smooth'})});
+document.addEventListener('keydown',e=>{if(e.key==='ArrowLeft')go(-1);if(e.key==='ArrowRight')go(1);});
+let x0=0;$('cards').addEventListener('touchstart',e=>{x0=e.touches[0].clientX},{passive:true});$('cards').addEventListener('touchend',e=>{const d=x0-e.changedTouches[0].clientX;if(Math.abs(d)>50)go(d>0?1:-1)});
+show(0);
+</script></body></html>

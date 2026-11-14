@@ -1,0 +1,19 @@
+{
+  "name": "itabs-video",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "bundle": "node scripts/bundle.mjs",
+    "test": "node scripts/bundle.mjs && node --test test/*.test.mjs"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "wrangler": "^4.162.0"
+  },
+  "private": true,
+  "type": "module"
+}
