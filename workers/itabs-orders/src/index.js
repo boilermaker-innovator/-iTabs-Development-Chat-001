@@ -1,6 +1,6 @@
 // iTabs Orders Worker
 // Takes orders from iTabs cafe pages (POST /order) and shows them on a staff screen (/).
-// Needs: KV namespace bound as ORDERS. Optional secret: STAFF_PIN.
+// Needs: D1 database bound as DB (table from schema.sql). Optional secret: STAFF_PIN.
 
 const CORS = {
   "Access-Control-Allow-Origin": "*",
@@ -9,8 +9,8 @@ const CORS = {
   "Access-Control-Max-Age": "86400",
 };
 
-const KEEP_SECONDS = 60 * 60 * 24 * 7;
-const DONE_KEEP_SECONDS = 60 * 60 * 24; // finished orders drop off the screen after a day
+const KEEP_MS = 1000 * 60 * 60 * 24 * 7;
+const DONE_KEEP_MS = 1000 * 60 * 60 * 24; // finished orders drop off the screen after a day
 const STATUSES = ["new", "making", "ready", "done"];
 
 function json(data, status = 200) {
@@ -28,8 +28,8 @@ export default {
     if (request.method === "OPTIONS") {
       return new Response(null, { status: 204, headers: CORS });
     }
-    if (!env.ORDERS) {
-      return json({ error: "ORDERS KV binding missing - add it in Worker settings" }, 500);
+    if (!env.DB) {
+      return json({ error: "DB (D1) binding missing - add it in Worker settings" }, 500);
     }
     if (path === "/order" && request.method === "POST") {
       return receiveOrder(request, env);
@@ -65,13 +65,19 @@ async function receiveOrder(request, env) {
   const problem = checkOrder(order);
   if (problem) return json({ error: problem }, 400);
 
-  const key = "order:" + order.order_id;
-  const existing = await env.ORDERS.get(key);
-  if (existing) return json({ status: "received", order_id: order.order_id });
-
+  const now = Date.now();
   order.status = "new";
-  order.received_at = new Date().toISOString();
-  await env.ORDERS.put(key, JSON.stringify(order), { expirationTtl: KEEP_SECONDS });
+  order.received_at = new Date(now).toISOString();
+  const sortKey = String(order.created_at || order.received_at);
+
+  // Clear out expired orders, then insert. INSERT OR IGNORE keeps a resend of the
+  // same order_id from overwriting the original (same as before: still replies "received").
+  await env.DB.batch([
+    env.DB.prepare("DELETE FROM orders WHERE expires_at <= ?").bind(now),
+    env.DB.prepare(
+      "INSERT OR IGNORE INTO orders (order_id, status, sort_key, expires_at, data) VALUES (?, ?, ?, ?, ?)"
+    ).bind(order.order_id, order.status, sortKey, now + KEEP_MS, JSON.stringify(order)),
+  ]);
   return json({ status: "received", order_id: order.order_id });
 }
 
@@ -90,23 +96,11 @@ function checkOrder(o) {
   return null;
 }
 
-function orderTime(o) {
-  return String(o.created_at || o.received_at || "");
-}
-
 async function listOrders(env) {
-  // KV list returns keys in name order (order id), not time order, max 1000 per page.
-  // Page through all of them so new orders are never cut off.
-  const keys = [];
-  let cursor;
-  do {
-    const page = await env.ORDERS.list({ prefix: "order:", cursor });
-    keys.push(...page.keys);
-    cursor = page.list_complete ? undefined : page.cursor;
-  } while (cursor);
-
-  const orders = await Promise.all(keys.map((k) => env.ORDERS.get(k.name, "json")));
-  return orders.filter(Boolean).sort((a, b) => orderTime(a).localeCompare(orderTime(b)));
+  const { results } = await env.DB.prepare(
+    "SELECT data FROM orders WHERE expires_at > ? ORDER BY sort_key"
+  ).bind(Date.now()).all();
+  return results.map((r) => JSON.parse(r.data));
 }
 
 async function setStatus(request, env, id) {
@@ -114,15 +108,17 @@ async function setStatus(request, env, id) {
   try { body = await request.json(); } catch { return json({ error: "bad json" }, 400); }
   if (!body || !STATUSES.includes(body.status)) return json({ error: "bad status" }, 400);
 
-  const key = "order:" + id;
-  const order = await env.ORDERS.get(key, "json");
-  if (!order) return json({ error: "order not found" }, 404);
+  const now = Date.now();
+  const updatedAt = new Date(now).toISOString();
+  const expiresAt = now + (body.status === "done" ? DONE_KEEP_MS : KEEP_MS);
+  const row = await env.DB.prepare(
+    "UPDATE orders SET status = ?1, expires_at = ?2, " +
+    "data = json_set(data, '$.status', ?1, '$.updated_at', ?3) " +
+    "WHERE order_id = ?4 AND expires_at > ?5 RETURNING order_id"
+  ).bind(body.status, expiresAt, updatedAt, id, now).first();
+  if (!row) return json({ error: "order not found" }, 404);
 
-  order.status = body.status;
-  order.updated_at = new Date().toISOString();
-  const ttl = order.status === "done" ? DONE_KEEP_SECONDS : KEEP_SECONDS;
-  await env.ORDERS.put(key, JSON.stringify(order), { expirationTtl: ttl });
-  return json({ status: "updated", order_id: id, order_status: order.status });
+  return json({ status: "updated", order_id: id, order_status: body.status });
 }
 
 const STAFF_HTML = `<!DOCTYPE html>
@@ -217,7 +213,7 @@ document.getElementById("list").addEventListener("click", function (e) {
     document.getElementById("note").textContent = "Could not update: " + err.message;
   }).then(load);
 });
-// Only poll while the screen is visible - each poll costs KV reads.
+// Only poll while the screen is visible - each poll costs database reads.
 load();
 setInterval(function () { if (!document.hidden) load(); }, 5000);
 document.addEventListener("visibilitychange", function () { if (!document.hidden) load(); });

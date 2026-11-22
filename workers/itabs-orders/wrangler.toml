@@ -1,10 +1,15 @@
 name = "itabs-orders"
 main = "src/index.js"
 compatibility_date = "2026-11-01"
+workers_dev = true
+routes = [{ pattern = "orders.itabs.co", custom_domain = true }]
 
-# Create with: npx wrangler kv namespace create ORDERS  -> paste the id below
-[[kv_namespaces]]
-binding = "ORDERS"
-id = "REPLACE_WITH_KV_NAMESPACE_ID"
+
+# D1 database "itabs-orders". No database_id here: on first `wrangler deploy`
+# Wrangler creates the database (or finds it by name) and binds it as DB.
+# Then create the table: npx wrangler d1 execute itabs-orders --remote --file schema.sql
+[[d1_databases]]
+binding = "DB"
+database_name = "itabs-orders"
 
 # Optional staff PIN: npx wrangler secret put STAFF_PIN
