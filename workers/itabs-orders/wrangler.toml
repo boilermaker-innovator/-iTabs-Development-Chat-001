@@ -4,12 +4,10 @@ compatibility_date = "2026-11-01"
 workers_dev = true
 routes = [{ pattern = "orders.itabs.co", custom_domain = true }]
 
-
-# D1 database "itabs-orders". No database_id here: on first `wrangler deploy`
-# Wrangler creates the database (or finds it by name) and binds it as DB.
-# Then create the table: npx wrangler d1 execute itabs-orders --remote --file schema.sql
+# D1 database "itabs-orders" (APAC). Table: npx wrangler d1 execute itabs-orders --remote --file schema.sql
 [[d1_databases]]
 binding = "DB"
 database_name = "itabs-orders"
+database_id = "283e25e6-eaae-4d2b-b651-6e23deb0a030"
 
 # Optional staff PIN: npx wrangler secret put STAFF_PIN
